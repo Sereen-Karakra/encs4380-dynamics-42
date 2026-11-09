@@ -9,7 +9,7 @@ Interactive web toolkit that makes the dynamic characteristics of sensors visibl
 | Member | Responsibility | Issue | Status |
 |---|---|---|---|
 | Maysam Abu Eid | Module 1: First-order time response | #2 | Done (live) |
-| Dania Abu Ayyash | Module 2: First-order frequency response | | In progress |
+| Dania Abu Ayyash | Module 2: First-order frequency response | Create GitHub Issue | Implemented locally; push to GitHub |
 | Sereen Karakra | Module 3: Second-order response | #1 | Done |
 | Raneem Khawaja | Module 4: "Guess the sensor" challenge | | Planned |
 | Masa Awad | Bonus work | | Planned |
@@ -29,14 +29,26 @@ Thermometer model: τ·dy/dt + y = K·x(t), G(s) = K / (τs + 1).
 
 Validation checks currently passing on the page: y(τ) = 0.632·KA, y(3τ) = 0.95·KA, ramp steady-state error = K·A·τ, ramp lag = τ, log-plot slope = −1/τ.
 
-### Module 2: First-order frequency response
-In progress (due Mon 9 Nov 2026).
+### Module 2: First-order frequency response (`module2.html`)
+Implemented in this project package (push to GitHub before the 9 Nov checkpoint).
+
+- Live τ, input frequency (Hz), gain K, and amplitude sliders; input/output steady-state sine plots.
+- Normalized amplitude ratio M, phase lag, output amplitude KAM, signed dynamic error δ = M − 1.
+- Log-frequency Bode magnitude and phase plots, with ωc = 1/τ marked.
+- Dynamic-error calculator: maximum allowable τ at a selectable frequency/error limit.
+- Predict-then-check interaction and independent validation cases from Homework 1 (0.93, 21.8°, 0.52 ms, 9.3°).
+
+The sine plot uses the **steady-state** solution; it intentionally omits the start-up transient.
 
 ### Module 3: Second-order response (`module3.html`)
 Done. See the page for details.
 
 ### Module 4: "Guess the sensor" challenge
 Planned (due Thu 12 Nov 2026).
+
+## Opening and navigation
+
+Open `index.html` or the GitHub Pages home URL. Use the module navigation across the top to open Module 2 or Module 3. Module 4 is not yet implemented; the label is intentionally not a link.
 
 ## Screenshots
 
@@ -66,7 +78,6 @@ Planned (due Thu 12 Nov 2026).
 
 We used an AI assistant (Claude) as allowed by the homework. Maysam used it to review the Module 1 code and fix errors (ramp steady-state error for K ≠ 1, the error-fraction plot, markers, and the validation table), and to help write the issue and this README. Every member must be able to explain their own code and equations in the demo.
 
-_Other members: add what you used AI for._
 
 ## Timeline
 

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 - First-Order Frequency Response</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; margin:0; padding:16px; background:#f4f7f6; color:#333; }
+  h1,h2,h3 { color:#1a365d; }
+  .card { background:#fff; padding:16px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,.1); margin:0 auto 16px; max-width:1000px; }
+  .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; margin-bottom:16px; }
+  label { font-weight:bold; display:block; margin-bottom:5px; }
+  input[type=range] { width:100%; }
+  .chart-container { position:relative; height:330px; margin:12px 0 22px; }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,350px),1fr)); gap:18px; }
+  .grid2 .chart-container { height:300px; }
+  .prediction-box { background:#fffbea; border-left:4px solid #d69e2e; padding:12px 15px; border-radius:4px; margin-bottom:15px; }
+  .prediction-box label { display:inline; font-weight:normal; margin-left:4px; }
+  .opt { margin:6px 0; }
+  button { background:#2b6cb0; color:#fff; border:0; padding:8px 14px; border-radius:5px; cursor:pointer; }
+  button:hover { background:#2c5282; }
+  .metrics { display:flex; flex-wrap:wrap; gap:10px 22px; background:#edf2f7; padding:12px; border-radius:5px; font-size:.95em; }
+  .metrics div { min-width:155px; }
+  .formula { font-family:Consolas,monospace; background:#edf2f7; padding:10px; border-radius:5px; overflow-x:auto; line-height:1.8; }
+  table { border-collapse:collapse; width:100%; display:block; overflow-x:auto; font-size:.92em; }
+  th,td { border:1px solid #cbd5e0; padding:8px 10px; text-align:left; white-space:nowrap; }
+  th { background:#edf2f7; }
+  .pass,.ok { color:#276749; font-weight:bold; }
+  .fail,.bad { color:#c53030; font-weight:bold; }
+  .note { font-size:.92em; color:#4a5568; line-height:1.6; }
+  .toolkit-nav { max-width:1000px; margin:0 auto 16px; display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+  .toolkit-nav a,.toolkit-nav span { padding:8px 12px; background:#fff; color:#1a365d; border-radius:6px; border:1px solid #cbd5e0; text-decoration:none; font-size:.92em; }
+  .toolkit-nav a:hover,.toolkit-nav a[aria-current="page"] { background:#1a365d; color:#fff; }
+  .toolkit-nav span { color:#718096; }
+  @media(max-width:520px) { body{padding:10px} .card{padding:12px} .chart-container{height:280px} }
+</style>
+</head>
+<body>
+<nav class="toolkit-nav" aria-label="Toolkit modules">
+  <a href="index.html">Module 1 · Time</a>
+  <a href="module2.html" aria-current="page">Module 2 · Frequency</a>
+  <a href="module3.html">Module 3 · Second order</a>
+  <span title="Module 4 is being developed">Module 4 · Coming soon</span>
+</nav>
+<div class="card">
+  <h1>Module 2: First-Order Frequency Response</h1>
+  <p>Developer: <b>Dania Abuayyash</b> &nbsp;|</b>ENCS4380 Interfacing Techniques</p> &nbsp;
+  <p>This is the <b>same first-order sensor</b> as Module 1, now driven by a sine wave instead of a step or ramp. Change the time constant or frequency to see how the sensor attenuates and delays the signal.</p>
+  <div class="formula">G(s) = K / (&tau;s + 1)<br>
+    M = |G(j&omega;)| / K = 1 / &radic;(1 + (&omega;&tau;)<sup>2</sup>)<br>
+    &phi; = &minus;atan(&omega;&tau;) &nbsp; | &nbsp; &omega; = 2&pi;f &nbsp; | &nbsp; &delta; = M &minus; 1
+  </div>
+  <h3>1. Explore the frequency response</h3>
+  <div class="controls">
+    <div><label for="tau">Time constant &tau; (s): <span id="vTau">0.20</span></label><input type="range" id="tau" min="0.05" max="2" step="0.05" value="0.2"></div>
+    <div><label for="frequency">Input frequency f (Hz): <span id="vF">0.50</span></label><input type="range" id="frequency" min="0.1" max="100" step="0.1" value="0.5"></div>
+    <div><label for="gain">Sensor gain K: <span id="vK">1.00</span></label><input type="range" id="gain" min="0.5" max="5" step="0.1" value="1"></div>
+    <div><label for="amplitude">Input amplitude A: <span id="vA">1.00</span></label><input type="range" id="amplitude" min="0.5" max="5" step="0.1" value="1"></div>
+  </div>
+  <div class="prediction-box">
+    <h4 style="margin:0 0 8px">💡 Predict, then check!</h4>
+    <p style="margin:0 0 8px">If you increase the sine-wave frequency while keeping &tau; fixed, what happens to the output amplitude ratio M?</p>
+    <div class="opt"><input type="radio" name="prediction" id="predUp" value="up"><label for="predUp">M increases</label></div>
+    <div class="opt"><input type="radio" name="prediction" id="predDown" value="down"><label for="predDown">M decreases</label></div>
+    <div class="opt"><input type="radio" name="prediction" id="predSame" value="same"><label for="predSame">M stays the same</label></div>
+    <button id="checkPrediction">Check my prediction</button> <span id="predResult" role="status" aria-live="polite"></span>
+  </div>
+  <div class="metrics" aria-live="polite">
+    <div><b>Angular frequency &omega;:</b> <span id="outOmega"></span> rad/s</div>
+    <div><b>Amplitude ratio M:</b> <span id="outM"></span></div>
+    <div><b>Phase lag &phi;:</b> <span id="outPhase"></span>&deg;</div>
+    <div><b>Output amplitude KAM:</b> <span id="outAmp"></span></div>
+    <div><b>Cutoff &omega;<sub>c</sub>:</b> <span id="outCutoff"></span> rad/s</div>
+    <div><b>Cutoff f<sub>c</sub>:</b> <span id="outFc"></span> Hz</div>
+    <div><b>Dynamic error &delta;:</b> <span id="outDelta"></span>%</div>
+    <div><b>Attenuation:</b> <span id="outDB"></span> dB (relative to K)</div>
+  </div>
+  <h3>2. Input and output sine waves (steady state)</h3>
+  <p class="note">Input x(t) = A sin(&omega;t). Sensor output y(t) = KAM sin(&omega;t + &phi;). The dashed reference Kx(t) shows the ideal response without frequency attenuation or phase delay. The waveform plot is steady state, so it does not include the initial transient.</p>
+  <div class="chart-container"><canvas id="sineChart" aria-label="Input and output sine waves"></canvas></div>
+  <h3>3. Bode plots</h3>
+  <p class="note">The frequency axis is logarithmic. The vertical dashed line marks the cutoff &omega;<sub>c</sub> = 1/&tau;, where M = 1/&radic;2, gain = &minus;3.01 dB relative to K, and phase = &minus;45&deg;. The gold dot marks the selected frequency (if visible).</p>
+  <div class="grid2">
+    <div><h3>Magnitude (dB relative to K)</h3><div class="chart-container"><canvas id="magnitudeChart"></canvas></div></div>
+    <div><h3>Phase (degrees)</h3><div class="chart-container"><canvas id="phaseChart"></canvas></div></div>
+  </div>
+  <h3>4. Dynamic-error calculator</h3>
+  <p class="note">For a sinusoidal input, &delta; = M &minus; 1, which is negative because the sensor attenuates amplitude. The absolute percentage gives the amount of amplitude error. Calculate the <b>maximum allowable &tau;</b> for a chosen highest signal frequency and error limit.</p>
+  <div class="controls">
+    <div><label for="maxFreq">Maximum signal frequency (Hz): <span id="vMaxFreq">100</span></label><input type="range" id="maxFreq" min="1" max="200" step="1" value="100"></div>
+    <div><label for="errorLimit">Maximum allowed error (%): <span id="vError">5</span></label><input type="range" id="errorLimit" min="1" max="20" step="1" value="5"></div>
+  </div>
+  <div class="metrics">
+    <div><b>Maximum &tau;:</b> <span id="outTauMax"></span> ms</div>
+    <div><b>Current &tau;:</b> <span id="outTauMs"></span> ms</div>
+    <div><b>Current error at f<sub>max</sub>:</b> <span id="outErrAtMax"></span>%</div>
+    <div><b>Meets limit?</b> <span id="outMeets"></span></div>
+  </div>
+  <h3>5. Validation checks from the homework</h3>
+  <p class="note">These independent fixed-case tests do not change when you move the sliders, so they can always be checked against the numbers specified by the instructor.</p>
+  <table><thead><tr><th>Check</th><th>Expected</th><th>Calculated</th><th>Result</th></tr></thead><tbody id="valBody"></tbody></table>
+</div>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = 2 * Math.PI;
+const fmt = (v, decimals = 3) => Number.isFinite(v) ? v.toFixed(decimals) : 'n/a';
+const amplitudeRatio = (tau, omega) => 1 / Math.hypot(1, omega * tau);
+const phaseRad = (tau, omega) => -Math.atan(omega * tau);
+const phaseDegrees = (tau, omega) => phaseRad(tau, omega) * 180 / Math.PI;
+const magnitudeDB = (tau, omega) => 20 * Math.log10(amplitudeRatio(tau, omega));
+const maxAllowedTau = (freq, errorFraction) => Math.sqrt(1 / Math.pow(1 - errorFraction, 2) - 1) / (TAU * freq);
+const opts = (xText, yText, logX = false) => ({
+  responsive:true, maintainAspectRatio:false, animation:false,
+  interaction:{ mode:'nearest', intersect:false },
+  plugins:{legend:{position:'bottom'}},
+  scales:{
+    x:{type:logX ? 'logarithmic':'linear',title:{display:true,text:xText}},
+    y:{title:{display:true,text:yText}}
+  }
+});
+const plotLine = (label, data, color, extras = {}) => ({ label, data, borderColor:color, backgroundColor:color, borderWidth:2, pointRadius:0, showLine:true, ...extras });
+const selectedPoint = (label, x, y) => ({ label, data:[{x,y}], pointRadius:6, pointHoverRadius:8, backgroundColor:'#d69e2e', borderColor:'#d69e2e', showLine:false });
+let sineChart, magnitudeChart, phaseChart;
+
+function buildChart(canvas, dataSets, options) {
+  return new Chart($(canvas), {type:'scatter',data:{datasets:dataSets},options});
+}
+function updatePlots() {
+  const tau=+$('tau').value, f=+$('frequency').value, K=+$('gain').value, A=+$('amplitude').value;
+  const omega=TAU*f, M=amplitudeRatio(tau,omega), phi=phaseRad(tau,omega);
+  const wc=1/tau, fc=wc/TAU, delta=(M-1)*100;
+  $('vTau').textContent=fmt(tau,2); $('vF').textContent=fmt(f,2);
+  $('vK').textContent=fmt(K,2); $('vA').textContent=fmt(A,2);
+  $('outOmega').textContent=fmt(omega,3); $('outM').textContent=fmt(M,4);
+  $('outPhase').textContent=fmt(phi*180/Math.PI,2); $('outAmp').textContent=fmt(K*A*M,4);
+  $('outCutoff').textContent=fmt(wc,3); $('outFc').textContent=fmt(fc,3);
+  $('outDelta').textContent=fmt(delta,2); $('outDB').textContent=fmt(magnitudeDB(tau,omega),2);
+
+  // Exactly three full periods, sampled densely even at high frequency.
+  const duration=3/f, N=600, input=[], ideal=[], output=[];
+  for(let i=0;i<=N;i++) {
+    const t=duration*i/N, a=omega*t;
+    input.push({x:t,y:A*Math.sin(a)});
+    ideal.push({x:t,y:K*A*Math.sin(a)});
+    output.push({x:t,y:K*A*M*Math.sin(a+phi)});
+  }
+  const waveSets=[
+    plotLine('Input x(t)',input,'#e53e3e',{borderDash:[5,4]}),
+    plotLine('Ideal output Kx(t)',ideal,'#a0aec0',{borderDash:[4,4]}),
+    plotLine('Sensor output y(t)',output,'#3182ce')
+  ];
+  if (!sineChart) sineChart=buildChart('sineChart',waveSets,opts('Time (seconds)','Signal amplitude'));
+  else { sineChart.data.datasets=waveSets; sineChart.update(); }
+
+  // Frequencies cover 2 decades on either side of the cutoff, with the selected
+  // frequency included so the marker is always visible and the axis stays logarithmic.
+  const lo=Math.min(wc/100,omega/1.6), hi=Math.max(wc*100,omega*1.6), samples=240;
+  const dbPoints=[], phPoints=[];
+  for(let i=0;i<=samples;i++) {
+    const w=lo*Math.pow(hi/lo,i/samples);
+    dbPoints.push({x:w,y:magnitudeDB(tau,w)});
+    phPoints.push({x:w,y:phaseDegrees(tau,w)});
+  }
+  const dbSets=[
+    plotLine('Magnitude response',dbPoints,'#3182ce'),
+    plotLine('Cutoff ωc = 1/τ',[{x:wc,y:magnitudeDB(tau,hi)},{x:wc,y:0}],'#d69e2e',{borderDash:[5,5],borderWidth:1.5}),
+    selectedPoint('Selected frequency',omega,magnitudeDB(tau,omega))
+  ];
+  const phSets=[
+    plotLine('Phase response',phPoints,'#805ad5'),
+    plotLine('Cutoff ωc = 1/τ',[{x:wc,y:-90},{x:wc,y:0}],'#d69e2e',{borderDash:[5,5],borderWidth:1.5}),
+    selectedPoint('Selected frequency',omega,phaseDegrees(tau,omega))
+  ];
+  if(!magnitudeChart) magnitudeChart=buildChart('magnitudeChart',dbSets,opts('Angular frequency ω (rad/s)','20 log10(M) (dB)',true));
+  else { magnitudeChart.data.datasets=dbSets; magnitudeChart.update(); }
+  if(!phaseChart) phaseChart=buildChart('phaseChart',phSets,opts('Angular frequency ω (rad/s)','Phase lag (degrees)',true));
+  else { phaseChart.data.datasets=phSets; phaseChart.update(); }
+  updateErrorCalculator();
+}
+function updateErrorCalculator() {
+  const f=+$('maxFreq').value, allowed=+$('errorLimit').value / 100, tau=+$('tau').value;
+  const tauMax=maxAllowedTau(f,allowed), actual=(1-amplitudeRatio(tau,TAU*f))*100;
+  $('vMaxFreq').textContent=String(f); $('vError').textContent=String(Math.round(allowed*100));
+  $('outTauMax').textContent=fmt(tauMax*1000,3);
+  $('outTauMs').textContent=fmt(tau*1000,1);
+  $('outErrAtMax').textContent=fmt(actual,2);
+  $('outMeets').innerHTML=actual<=allowed*100+1e-9 ? '<span class="pass">YES</span>' : '<span class="fail">NO</span>';
+}
+function checkPrediction() {
+  const selection=document.querySelector('input[name="prediction"]:checked');
+  if(!selection) { $('predResult').innerHTML='<span class="bad">Choose an option first.</span>'; return; }
+  $('predResult').innerHTML=(selection.value==='down' ? '<span class="ok">Correct!</span> ' : '<span class="bad">Not quite.</span> ')+
+    'As frequency increases, ωτ increases, so M = 1/√(1+(ωτ)²) decreases. Try moving the frequency slider.';
+}
+function runValidation() {
+  const rows=[];
+  const add=(name,expected,actual,ok)=>rows.push(`<tr><td>${name}</td><td>${expected}</td><td>${actual}</td><td class="${ok?'pass':'fail'}">${ok?'PASS':'FAIL'}</td></tr>`);
+  const m=amplitudeRatio(0.2,2), ph=Math.abs(phaseDegrees(0.2,2));
+  add('2a. τ = 0.2 s, ω = 2 rad/s: M','0.93',fmt(m,4),Math.abs(m-0.93)<0.005);
+  add('2b. τ = 0.2 s, ω = 2 rad/s: lag','21.8°',fmt(ph,3)+'°',Math.abs(ph-21.8)<0.1);
+  const tmax=maxAllowedTau(100,0.05);
+  add('3a. Up to 100 Hz, maximum 5% error: τmax','≈ 0.52 ms',fmt(tmax*1000,4)+' ms',Math.abs(tmax*1000-0.52)<0.01);
+  const lag50=Math.abs(phaseDegrees(tmax,TAU*50));
+  add('3b. Phase lag at 50 Hz using τmax','9.3°',fmt(lag50,3)+'°',Math.abs(lag50-9.3)<0.2);
+  const cutoffRatio=amplitudeRatio(0.2,1/0.2), cutoffPhase=phaseDegrees(0.2,1/0.2);
+  add('Cutoff ωc = 1/τ: M and phase','0.7071, −45°',fmt(cutoffRatio,4)+', '+fmt(cutoffPhase,1)+'°',Math.abs(cutoffRatio-Math.SQRT1_2)<1e-9&&Math.abs(cutoffPhase+45)<1e-9);
+  $('valBody').innerHTML=rows.join('');
+}
+['tau','frequency','gain','amplitude'].forEach(id=>$(id).addEventListener('input',updatePlots));
+['maxFreq','errorLimit'].forEach(id=>$(id).addEventListener('input',updateErrorCalculator));
+$('checkPrediction').addEventListener('click',checkPrediction);
+runValidation();
+updatePlots();
+</script>
+</body>
+</html>

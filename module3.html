@@ -21,9 +21,19 @@ button { padding:6px 12px; margin:2px; cursor:pointer; }
 table { border-collapse:collapse; width:100%; display:block; overflow-x:auto; }
 th, td { border:1px solid #cbd5e0; padding:6px 10px; text-align:left; }
 .pass { color:#2f855a; font-weight:bold; } .fail { color:#c53030; font-weight:bold; }
+.toolkit-nav { max-width:1000px; margin:0 auto 16px; display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+.toolkit-nav a, .toolkit-nav span { padding:8px 12px; background:#fff; color:#1a365d; border-radius:6px; border:1px solid #cbd5e0; text-decoration:none; font-size:.92em; }
+.toolkit-nav a:hover, .toolkit-nav a[aria-current="page"] { background:#1a365d; color:#fff; }
+.toolkit-nav span { color:#718096; }
 </style>
 </head>
 <body>
+<nav class="toolkit-nav" aria-label="Toolkit modules">
+  <a href="index.html">Module 1 · Time</a>
+  <a href="module2.html">Module 2 · Frequency</a>
+  <a href="module3.html" aria-current="page">Module 3 · Second order</a>
+  <span title="Module 4 is being developed">Module 4 · Coming soon</span>
+</nav>
 <div class="card">
   <p><a href="index.html">&larr; Back to toolkit</a></p>
   <h1>Module 3: Second-Order Response (Mass-Spring-Damper)</h1>
@@ -191,7 +201,7 @@ function update() {
   sChart.update();
 
   const cx = e => e[1] === 0 ? fmt(e[0]) : `${fmt(e[0])} ${e[1] > 0 ? '+' : '-'} j${fmt(Math.abs(e[1]))}`;
-  $('ssBox').innerHTML = `A = [ 0 &nbsp; 1 ; ${fmt(-k / m, 2)} &nbsp; ${fmt(-b / m, 2)} ]<br>B = [ 0 ; ${fmt(1 / m, 2)} ]<sup>T</sup>, &nbsp; C = [ 1 &nbsp; 0 ]`;
+  $('ssBox').innerHTML = `A = [ 0 &nbsp; 1 ; ${fmt(-k / m, 2)} &nbsp; ${fmt(-b / m, 2)} ]<br>B = [ 0 ; ${fmt(1 / m, 2)} ], &nbsp; C = [ 1 &nbsp; 0 ]`;
   $('eigLine').innerHTML = `<b>Eigenvalues of A:</b> ${cx(ev[0])}, ${cx(ev[1])} &nbsp;|&nbsp; <b>Poles of G(s):</b> ${cx(pl[0])}, ${cx(pl[1])} &nbsp;&rarr; same numbers`;
   pChart.data.datasets[0].data = rk4Path(A, B, F, tMax);
   pChart.update();

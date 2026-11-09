@@ -24,9 +24,19 @@
   th { background:#edf2f7; }
   .pass { color:#276749; font-weight:bold; } .fail { color:#c53030; font-weight:bold; }
   .ok { color:#276749; font-weight:bold; } .bad { color:#c53030; font-weight:bold; }
+.toolkit-nav { max-width:1000px; margin:0 auto 16px; display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+.toolkit-nav a, .toolkit-nav span { padding:8px 12px; background:#fff; color:#1a365d; border-radius:6px; border:1px solid #cbd5e0; text-decoration:none; font-size:.92em; }
+.toolkit-nav a:hover, .toolkit-nav a[aria-current="page"] { background:#1a365d; color:#fff; }
+.toolkit-nav span { color:#718096; }
 </style>
 </head>
 <body>
+<nav class="toolkit-nav" aria-label="Toolkit modules">
+  <a href="index.html" aria-current="page">Module 1 · Time</a>
+  <a href="module2.html">Module 2 · Frequency</a>
+  <a href="module3.html">Module 3 · Second order</a>
+  <span title="Module 4 is being developed">Module 4 · Coming soon</span>
+</nav>
 
 <div class="card">
   <h1>Dynamic Characteristics Interactive Toolkit</h1>
