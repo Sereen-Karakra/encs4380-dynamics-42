@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Module 4 - Guess the Sensor</title>
+ 
+  
+  <style> 
+  button {
+  background: #2b6cb0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  margin: 6px 4px 6px 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2c5282;
+}
+
+button:disabled {
+  background: #e2e8f0;
+  color: #718096;
+  cursor: default;
+}
+
+input[type="number"] {
+  padding: 10px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.instructions {
+  color: #4a5568;
+  font-size: 14px;
+  line-height: 1.6;
+}
+  * {
+  box-sizing: border-box;
+}
+
+.chart-container {
+  width: 100%;
+  min-width: 0;
+}
+
+input[type="number"] {
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .toolkit-nav a {
+    font-size: 14px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  button {
+    padding: 10px 14px;
+    margin: 4px 0;
+  }
+
+  .chart-container {
+    height: 280px;
+  }
+}
+    .toolkit-nav {
+  max-width: 1000px;
+  margin: 0 auto 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.toolkit-nav a {
+  padding: 8px 12px;
+  background: white;
+  color: #1a365d;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.toolkit-nav a:hover,
+.toolkit-nav a[aria-current="page"] {
+  background: #1a365d;
+  color: white;
+}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7f6;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .card {
+      max-width: 1000px;
+      margin: 0 auto 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+    }
+
+    h1, h2 {
+      color: #1a365d;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 350px;
+    }
+  </style>
+</head>
+
+<body>
+    <nav class="toolkit-nav" aria-label="Toolkit modules">
+  <a href="index.html">Module 1 · Time</a>
+  <a href="module2.html">Module 2 · Frequency</a>
+  <a href="module3.html">Module 3 · Second order</a>
+  <a href="module4.html" aria-current="page">
+    Module 4 · Guess the sensor
+  </a>
+</nav>
+  <div class="card">
+    <h1>Module 4: Guess the Sensor</h1>
+    <p>Developer: Raneem Khawaja</p>
+    <p>
+      Look at a hidden sensor's response and estimate its parameters.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Hidden Sensor Response</h2>
+    <p>Study the curve, then estimate the sensor parameters.</p>
+   <p id="inputDescription">Input: unit step, amplitude = 1.</p>
+
+    <button type="button" onclick="window.location.reload()">
+      New Sensor
+    </button>
+
+    <div class="chart-container">
+      <canvas id="sensorChart"></canvas>
+    </div>
+
+    <p id="chartMessage" role="status"></p>
+  </div>
+
+  <div class="card">
+    <h2>Make Your Guess</h2>
+    <p class="instructions">
+  One guess per sensor. Each required parameter must be within
+  10% of its true value to receive full marks.
+  Select New Sensor to try another challenge.
+</p>
+    <label for="tauGuess">
+      Estimated time constant (seconds):
+    </label>
+
+    <input
+      type="number"
+      id="tauGuess"
+      min="0.01"
+      step="0.01"
+      placeholder="Enter your estimate"
+    >
+
+
+   <div id="secondOrderInputs" hidden>
+  <p>
+    <label for="zetaGuess">
+      Estimated damping ratio (zeta):
+    </label>
+    <input
+      type="number"
+      id="zetaGuess"
+      min="0.01"
+      step="0.01"
+      placeholder="Enter zeta"
+    >
+  </p>
+
+  <p>
+    <label for="wnGuess">
+      Estimated natural frequency (rad/s):
+    </label>
+    <input
+      type="number"
+      id="wnGuess"
+      min="0.01"
+      step="0.01"
+      placeholder="Enter omega n"
+    >
+  </p>
+</div>
+
+<button
+  type="button"
+  id="checkGuessButton"
+  onclick="checkGuess()"
+>
+  Check Guess
+</button>
+
+<button type="button" onclick="showHint()">Hint</button>
+
+<p id="hintText" role="status"></p>
+<p id="guessResult" role="status"></p>
+<p id="sessionScore" role="status"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script>
+  // Randomly choose the sensor order
+  const secondOrder = Math.random() < 0.5;
+  // Sometimes use a sine input for first-order sensors
+const sineInput = !secondOrder && Math.random() < 0.5;
+const omega = 0.5 + Math.random();
+  const K = secondOrder ? 1 : 0.5 + Math.random() * 1.5;
+  const tau = 0.5 + Math.random() * 2.5;
+
+  // Use underdamped sensors so overshoot and peak time are measurable
+  const zeta = 0.2 + Math.random() * 0.45;
+  const wn = 1 + Math.random() * 3;
+
+  let sensorChart;
+  let answered = false;
+
+  const points = [];
+  const noisyPoints = [];
+
+  // Restore the session score
+  let totalScore =
+    Number(sessionStorage.getItem("sensorTotalScore")) || 0;
+
+  let roundsPlayed =
+    Number(sessionStorage.getItem("sensorRounds")) || 0;
+
+  function updateScoreDisplay() {
+    document.getElementById("sessionScore").textContent =
+      "Session score: " + totalScore + " / " +
+      (roundsPlayed * 100) +
+      " | Rounds played: " + roundsPlayed;
+  }
+
+  updateScoreDisplay();
+
+  // Show the fields needed for this sensor
+  document.getElementById("secondOrderInputs").hidden = !secondOrder;
+
+  document.getElementById("tauGuess").hidden = secondOrder;
+
+  document.querySelector('label[for="tauGuess"]').hidden =
+    secondOrder;
+
+  document.getElementById("chartMessage").textContent =
+    secondOrder
+      ? "Second-order sensor. Estimate zeta and omega n. Gain K = 1."
+      : "First-order sensor. Estimate tau.";
+
+  // Calculate a first-order unit-step response
+  function firstResponse(t, gain, timeConstant) {
+    return gain * (1 - Math.exp(-t / timeConstant));
+  }
+
+  // Calculate a second-order unit-step response
+  function secondResponse(t, damping, frequency) {
+    if (Math.abs(damping - 1) < 0.000001) {
+      return 1 -
+        Math.exp(-frequency * t) * (1 + frequency * t);
+    }
+
+    if (damping < 1) {
+      const q = Math.sqrt(1 - damping * damping);
+      const wd = frequency * q;
+
+      return 1 - Math.exp(-damping * frequency * t) * (
+        Math.cos(wd * t) +
+        damping / q * Math.sin(wd * t)
+      );
+    }
+
+    // Overdamped response, also supported for user estimates
+    const q = Math.sqrt(damping * damping - 1);
+    const r1 = -frequency / (damping + q);
+    const r2 = -frequency * (damping + q);
+
+    return 1 + (
+      r2 * Math.exp(r1 * t) -
+      r1 * Math.exp(r2 * t)
+    ) / (r1 - r2);
+  }
+   // Calculate the steady-state first-order sine response
+function sineResponse(t, timeConstant) {
+  const ratio = 1 / Math.sqrt(1 + (omega * timeConstant) ** 2);
+  const phase = Math.atan(omega * timeConstant);
+
+  return K * ratio * Math.sin(omega * t - phase);
+}
+
+document.getElementById("inputDescription").textContent = sineInput
+  ? "Input: sin(omega * t), amplitude = 1, omega = " +
+    omega.toFixed(3) +
+    " rad/s. Steady-state response; estimate tau from phase lag."
+  : "Input: unit step, amplitude = 1."; 
+
+
+  // Display enough time for the response to settle
+const endTime = secondOrder
+  ? 8 / (zeta * wn)
+  : sineInput
+    ? 4 * 2 * Math.PI / omega
+    : 7 * tau;
+  for (let i = 0; i <= 500; i++) {
+    const t = endTime * i / 500;
+
+    const y = secondOrder
+  ? secondResponse(t, zeta, wn)
+  : sineInput
+    ? sineResponse(t, tau)
+    : firstResponse(t, K, tau);
+
+    points.push({ x: t, y: y });
+
+    const noise = (Math.random() * 2 - 1) * 0.01 * K;
+    noisyPoints.push({ x: t, y: y + noise });
+  }
+
+  if (typeof Chart === "undefined") {
+    document.getElementById("chartMessage").textContent =
+      "Chart library could not load. Check your internet connection.";
+
+    document.getElementById("checkGuessButton").disabled = true;
+  } else {
+    sensorChart = new Chart(
+      document.getElementById("sensorChart"),
+      {
+        type: "line",
+
+        data: {
+          datasets: [{
+            label: "Measured response",
+            data: noisyPoints,
+            borderColor: "#2b6cb0",
+            borderWidth: 2,
+            pointRadius: 0
+          }]
+        },
+
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+
+          scales: {
+            x: {
+              type: "linear",
+              title: {
+                display: true,
+                text: "Time (s)"
+              }
+            },
+
+            y: {
+              title: {
+                display: true,
+                text: "Output"
+              }
+            }
+          }
+        }
+      }
+    );
+  }
+  // Show the input as a reference for measuring phase lag
+if (sineInput && sensorChart) {
+  sensorChart.data.datasets.push({
+    label: "Input signal",
+    data: points.map(function(point) {
+      return {
+        x: point.x,
+        y: Math.sin(omega * point.x)
+      };
+    }),
+    borderColor: "#805ad5",
+    borderWidth: 2,
+    borderDash: [4, 4],
+    pointRadius: 0
+  });
+
+  sensorChart.update();
+} 
+
+  // Calculate relative parameter error
+  function relativeError(estimate, actual) {
+    return Math.abs(estimate - actual) / actual * 100;
+  }
+
+  function checkGuess() {
+    if (answered || !sensorChart) {
+      return;
+    }
+
+    const result = document.getElementById("guessResult");
+
+    const tauEstimate =
+      Number(document.getElementById("tauGuess").value);
+
+    const zetaEstimate =
+      Number(document.getElementById("zetaGuess").value);
+
+    const wnEstimate =
+      Number(document.getElementById("wnGuess").value);
+
+    const estimates = secondOrder
+      ? [zetaEstimate, wnEstimate]
+      : [tauEstimate];
+
+    if (estimates.some(value =>
+      !Number.isFinite(value) || value <= 0
+    )) {
+      result.textContent =
+        "Please enter a positive number for each required parameter.";
+      return;
+    }
+
+    // Both second-order parameters must be within 10% for full marks
+    const error = secondOrder
+      ? Math.max(
+          relativeError(zetaEstimate, zeta),
+          relativeError(wnEstimate, wn)
+        )
+      : relativeError(tauEstimate, tau);
+
+    const roundScore = error <= 10
+      ? 100
+      : Math.max(0, Math.round(100 - (error - 10)));
+
+    const details = secondOrder
+      ? "True zeta: " + zeta.toFixed(3) +
+        " | True omega n: " + wn.toFixed(3) + " rad/s" +
+        " | Zeta error: " +
+        relativeError(zetaEstimate, zeta).toFixed(1) + "%" +
+        " | Omega n error: " +
+        relativeError(wnEstimate, wn).toFixed(1) + "%"
+      : "True K: " + K.toFixed(3) +
+  " | True tau: " + tau.toFixed(3) + " s" +
+        " | Error: " + error.toFixed(1) + "%";
+
+    result.textContent =
+      details + " | Round score: " + roundScore + "/100 | " +
+      (error <= 10
+        ? "Full marks!"
+        : "Outside the 10% tolerance.");
+
+    const guessedPoints = points.map(function(point) {
+      return {
+        x: point.x,
+        y: secondOrder
+          ? secondResponse(point.x, zetaEstimate, wnEstimate)
+          : sineInput
+            ? sineResponse(point.x, tauEstimate)
+            : firstResponse(point.x, K, tauEstimate)
+      };
+    });
+
+    sensorChart.data.datasets.push({
+      label: "True response",
+      data: points,
+      borderColor: "#68d391",
+      borderWidth: 3,
+      pointRadius: 0
+    });
+
+    sensorChart.data.datasets.push({
+      label: "Your estimated response",
+      data: guessedPoints,
+      borderColor: "#dd6b20",
+      borderWidth: 2,
+      borderDash: [6, 4],
+      pointRadius: 0
+    });
+
+    sensorChart.update();
+
+    answered = true;
+    document.getElementById("checkGuessButton").disabled = true;
+
+    ["tauGuess", "zetaGuess", "wnGuess"].forEach(function(id) {
+      document.getElementById(id).disabled = true;
+    });
+
+    totalScore += roundScore;
+    roundsPlayed += 1;
+
+    sessionStorage.setItem("sensorTotalScore", String(totalScore));
+    sessionStorage.setItem("sensorRounds", String(roundsPlayed));
+
+    updateScoreDisplay();
+  }
+
+  function showHint() {
+  let hint;
+
+  if (secondOrder) {
+    hint =
+      "Final output = 1. Mp = first peak output - 1. " +
+      "zeta = -ln(Mp) / sqrt(pi^2 + ln(Mp)^2). " +
+      "omega n = pi / (peak time * sqrt(1 - zeta^2)).";
+  } else if (sineInput) {
+    hint =
+      "Measure the delay dt from an input peak to the next output peak. " +
+      "Phase lag = omega * dt in radians. " +
+      "Then tau = tan(phase lag) / omega. " +
+      "Use matching peaks away from the plot edges.";
+  } else {
+    hint =
+      "Estimate the final output and multiply it by 0.632. " +
+      "The time when the curve reaches that level is approximately tau.";
+  }
+
+  document.getElementById("hintText").textContent = hint;
+}
+</script>
+</body>
+</html>

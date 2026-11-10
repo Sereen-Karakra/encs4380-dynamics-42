@@ -6,13 +6,13 @@ Interactive web toolkit that makes the dynamic characteristics of sensors visibl
 
 ## Team
 
-| Member | Responsibility | Issue | Status |
-|---|---|---|---|
-| Maysam Abu Eid | Module 1: First-order time response | #2 | Done (live) |
-| Dania Abu Ayyash | Module 2: First-order frequency response | #3 | Done |
-| Sereen Karakra | Module 3: Second-order response | #1 | Done |
-| Raneem Khawaja | Module 4: "Guess the sensor" challenge | | Planned |
-| Masa Awad | Bonus work | | Planned |
+|    Member         |             Responsibility                | Issue | Status |
+|-------------------|-------------------------------------------|-------|--------|
+| Maysam Abu Eid    | Module 1: First-order time response       |   #2  | Done (live) |
+| Dania Abu Ayyash  | Module 2: First-order frequency response  |   #3  | Done   |
+| Sereen Karakra    | Module 3: Second-order response           |   #1  | Done   |
+| Raneem Khawaja    | Module 4: "Guess the sensor" challenge    |       | Done   |
+| Masa Awad         | Bonus work                                |       | Planned|
 
 ## Modules
 
@@ -43,12 +43,25 @@ The sine plot uses the **steady-state** solution; it intentionally omits the sta
 ### Module 3: Second-order response (`module3.html`)
 Done. See the page for details.
 
-### Module 4: "Guess the sensor" challenge
-Planned (due Thu 12 Nov 2026).
+### Module 4: "Guess the sensor" challenge (`module4.html`)
+
+- Random first-order or underdamped second-order sensors.
+- First-order challenges use a unit step or a steady-state sine input.
+- Second-order challenges use a unit step.
+- Measured responses include small random noise.
+- Users estimate tau, or zeta and omega n.
+- After submission, the true parameters are revealed and the true
+  and estimated responses are plotted together.
+- Each required parameter must be within 10% for full marks.
+- Outside the tolerance, the score decreases with the largest
+  relative parameter error, down to a minimum of zero.
+- One guess per sensor, with hints and a New Sensor button.
+- The running score is stored in sessionStorage for the browser tab.
+- Responsive layout for desktop and mobile screens.
 
 ## Opening and navigation
 
-Open `index.html` or the GitHub Pages home URL. Use the module navigation across the top to open Module 2 or Module 3. Module 4 is not yet implemented; the label is intentionally not a link.
+Open `index.html` or the GitHub Pages home URL. Use the module navigation across the top to open Module 2 or Module 3.Module 4 is available through the navigation as "Guess the sensor".
 
 ## Screenshots
 
