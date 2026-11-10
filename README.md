@@ -11,7 +11,7 @@ Interactive web toolkit that makes the dynamic characteristics of sensors visibl
 | Maysam Abu Eid    | Module 1: First-order time response       |   #2  | Done (live) |
 | Dania Abu Ayyash  | Module 2: First-order frequency response  |   #3  | Done   |
 | Sereen Karakra    | Module 3: Second-order response           |   #1  | Done   |
-| Raneem Khawaja    | Module 4: "Guess the sensor" challenge    |       | Done   |
+| Raneem Khawaja    | Module 4: "Guess the sensor" challenge    |   #3  | Done   |
 | Masa Awad         | Bonus work                                |       | Planned|
 
 ## Modules
@@ -90,7 +90,7 @@ Open `index.html` or the GitHub Pages home URL. Use the module navigation across
 ## AI use
 
 We used an AI assistant (Claude) as allowed by the homework. Maysam used it to review the Module 1 code and fix errors (ramp steady-state error for K ≠ 1, the error-fraction plot, markers, and the validation table), and to help write the issue and this README. Every member must be able to explain their own code and equations in the demo.
-
+Raneem used ChatGPT for coding assistance, debugging, and explanations in Module 4.
 
 ## Timeline
 
