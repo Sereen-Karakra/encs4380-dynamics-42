@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bonus - ODE Solver vs Closed-Form</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; margin:0; padding:16px; background:#f4f7f6; color:#333; }
+  h1,h2,h3 { color:#1a365d; }
+  .card { background:#fff; padding:16px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,.1); margin:0 auto 16px; max-width:1000px; }
+  .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:14px; }
+  label { font-weight:bold; display:block; margin-bottom:5px; }
+  input[type=range] { width:100%; }
+  .metrics { display:flex; flex-wrap:wrap; gap:8px 20px; font-size:.95em; background:#edf2f7; padding:10px; border-radius:5px; margin-bottom:14px; }
+  .note { font-size:.92em; color:#4a5568; line-height:1.6; }
+  .chart-container { position:relative; height:340px; margin-bottom:16px; }
+  .prediction-box { background:#fffbea; border-left:4px solid #d69e2e; padding:12px 15px; border-radius:4px; margin-bottom:15px; }
+  .prediction-box label { display:inline; font-weight:normal; margin-left:4px; }
+  .opt { margin:6px 0; }
+  button { background:#2b6cb0; color:#fff; border:0; padding:8px 14px; border-radius:5px; cursor:pointer; }
+  button:hover { background:#2c5282; }
+  .ok { color:#276749; font-weight:bold; }
+  .bad { color:#c53030; font-weight:bold; }
+  .toolkit-nav { max-width:1000px; margin:0 auto 16px; display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+  .toolkit-nav a { padding:8px 12px; background:#fff; color:#1a365d; border-radius:6px; border:1px solid #cbd5e0; text-decoration:none; font-size:.92em; }
+  .toolkit-nav a:hover, .toolkit-nav a[aria-current="page"] { background:#1a365d; color:#fff; }
+  @media(max-width:520px) { body{padding:10px} .card{padding:12px} .chart-container{height:280px} }
+</style>
+</head>
+<body>
+<nav class="toolkit-nav" aria-label="Toolkit modules">
+  <a href="index.html">Module 1 · Time</a>
+  <a href="module2.html">Module 2 · Frequency</a>
+  <a href="module3.html">Module 3 · Second order</a>
+  <a href="module4.html">Module 4 · Guess the sensor</a>
+  <a href="bonus.html" aria-current="page">Bonus · ODE solver</a>
+</nav>
+
+<div class="card">
+  <h1>Bonus: Euler and RK4 vs the Closed-Form Response</h1>
+  <p>Developer: <b>Masa Awad</b> | ENCS4380 Interfacing Techniques</p>
+  <p>We solve the sensor's differential equation numerically and compare it with the exact formula from the lecture.</p>
+</div>
+
+<div class="card">
+  <h3>First-order step response: Euler and RK4 vs exact</h3>
+  <p class="note">ODE: &tau;&middot;dy/dt + y = K&middot;A &nbsp;&rArr;&nbsp; dy/dt = f(y) = (K&middot;A &minus; y)/&tau;, with y(0) = 0.<br>
+  Euler: y<sub>n+1</sub> = y<sub>n</sub> + h&middot;f(y<sub>n</sub>). RK4: y<sub>n+1</sub> = y<sub>n</sub> + (h/6)(k<sub>1</sub> + 2k<sub>2</sub> + 2k<sub>3</sub> + k<sub>4</sub>).<br>
+  Exact: y(t) = K&middot;A&middot;(1 &minus; e<sup>&minus;t/&tau;</sup>).</p>
+
+  <div class="prediction-box">
+    <h4 style="margin:0 0 8px">💡 Predict, then check!</h4>
+    <p style="margin:0 0 8px">You cut the step size h in half (for example 0.5 &rarr; 0.25). How do the maximum errors change?</p>
+    <div class="opt"><input type="radio" name="pred" id="pA" value="A"><label for="pA">Both errors drop by about 2&times;</label></div>
+    <div class="opt"><input type="radio" name="pred" id="pB" value="B"><label for="pB">Euler drops about 2&times;, RK4 drops about 16&times;</label></div>
+    <div class="opt"><input type="radio" name="pred" id="pC" value="C"><label for="pC">Euler drops about 4&times;, RK4 drops about 16&times;</label></div>
+    <div class="opt"><input type="radio" name="pred" id="pD" value="D"><label for="pD">Neither error changes</label></div>
+    <button id="predBtn">Check my prediction</button>
+    <span id="predResult" role="status" aria-live="polite" style="margin-left:10px"></span>
+  </div>
+
+  <div class="controls">
+    <div><label for="gainK">Gain (K): <span id="valK">1.0</span></label>
+      <input type="range" id="gainK" min="0.5" max="5" step="0.1" value="1"></div>
+    <div><label for="tau">Time constant (&tau;) [s]: <span id="valTau">2.0</span></label>
+      <input type="range" id="tau" min="0.5" max="10" step="0.5" value="2"></div>
+    <div><label for="amp">Step amplitude (A): <span id="valA">1.0</span></label>
+      <input type="range" id="amp" min="1" max="20" step="1" value="1"></div>
+    <div><label for="stepH">Step size (h) [s]: <span id="valH">0.50</span></label>
+      <input type="range" id="stepH" min="0.05" max="2" step="0.05" value="0.5"></div>
+  </div>
+
+  <div class="metrics">
+    <div id="mSteps"></div>
+    <div id="mRatio"></div>
+    <div id="mErr"></div>
+    <div id="mErrRK"></div>
+  </div>
+
+  <div class="chart-container"><canvas id="odeChart"></canvas></div>
+
+  <h3>Error vs exact (log scale)</h3>
+  <p class="note">|numerical &minus; exact| at each step. A lower curve means a more accurate method. Zero error is not shown on a log axis.</p>
+  <div class="chart-container"><canvas id="errChart"></canvas></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let odeChart, errChart;
+
+// Exact step response: y(t) = K*A*(1 - e^(-t/tau))
+const exactStep = (K, A, tau, t) => K * A * (1 - Math.exp(-t / tau));
+
+// Euler: y' = (K*A - y)/tau, y(0) = 0, returns points at t = i*h
+function eulerStep(K, A, tau, h, tMax) {
+  const n = Math.floor(tMax / h + 1e-9);
+  const pts = [{ x: 0, y: 0 }];
+  let y = 0;
+  for (let i = 1; i <= n; i++) {
+    y = y + h * (K * A - y) / tau;
+    pts.push({ x: i * h, y: y });
+  }
+  return pts;
+}
+
+// RK4: same ODE, f(y) = (K*A - y)/tau, returns points at t = i*h
+function rk4Step(K, A, tau, h, tMax) {
+  const f = y => (K * A - y) / tau;
+  const n = Math.floor(tMax / h + 1e-9);
+  const pts = [{ x: 0, y: 0 }];
+  let y = 0;
+  for (let i = 1; i <= n; i++) {
+    const k1 = f(y);
+    const k2 = f(y + h / 2 * k1);
+    const k3 = f(y + h / 2 * k2);
+    const k4 = f(y + h * k3);
+    y = y + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4);
+    pts.push({ x: i * h, y: y });
+  }
+  return pts;
+}
+
+// Max |numerical - exact| over the solver's own nodes
+function maxError(pts, K, A, tau) {
+  let m = 0;
+  pts.forEach(p => { m = Math.max(m, Math.abs(p.y - exactStep(K, A, tau, p.x))); });
+  return m;
+}
+
+// Predict, then check
+function checkPrediction() {
+  const sel = document.querySelector('input[name=pred]:checked');
+  if (!sel) { $('predResult').innerHTML = '<span class="bad">Pick an answer first, then check.</span>'; return; }
+  const why = 'Euler is a first-order method (error ~ h), so halving h halves its error. RK4 is fourth-order (error ~ h⁴), so halving h cuts its error by 2⁴ = 16. Try h = 0.5 and then h = 0.25 and compare the two error values.';
+  $('predResult').innerHTML = sel.value === 'B'
+    ? '<span class="ok">Correct!</span> ' + why
+    : '<span class="bad">Not quite.</span> ' + why;
+}
+
+function update() {
+  const K = parseFloat($('gainK').value), tau = parseFloat($('tau').value);
+  const A = parseFloat($('amp').value), h = parseFloat($('stepH').value);
+  $('valK').textContent = K.toFixed(1);
+  $('valTau').textContent = tau.toFixed(1);
+  $('valA').textContent = A.toFixed(1);
+  $('valH').textContent = h.toFixed(2);
+
+  const tMax = Math.max(10, 5 * tau), N = 300;
+  const exact = [];
+  for (let i = 0; i <= N; i++) {
+    const t = tMax * i / N;
+    exact.push({ x: t, y: exactStep(K, A, tau, t) });
+  }
+  const euler = eulerStep(K, A, tau, h, tMax);
+  const rk4 = rk4Step(K, A, tau, h, tMax);
+  const errE = maxError(euler, K, A, tau);
+  const errR = maxError(rk4, K, A, tau);
+
+  $('mSteps').innerHTML = `<b>Number of steps:</b> ${euler.length - 1}`;
+  $('mRatio').innerHTML = `<b>h/&tau;:</b> ${(h / tau).toFixed(2)}`;
+  $('mErr').innerHTML = `<b>Max Euler error:</b> ${errE.toExponential(2)}`;
+  $('mErrRK').innerHTML = `<b>Max RK4 error:</b> ${errR.toExponential(2)}`;
+
+  const datasets = [
+    { label: 'Exact y(t)', data: exact, borderColor: '#3182ce', borderWidth: 2, pointRadius: 0, showLine: true },
+    { label: 'Euler', data: euler, borderColor: '#dd6b20', backgroundColor: '#dd6b20', borderWidth: 1.5, pointRadius: 3, showLine: true },
+    { label: 'RK4', data: rk4, borderColor: '#38a169', backgroundColor: '#38a169', borderWidth: 1.5, pointRadius: 3, pointStyle: 'rectRot', showLine: true }
+  ];
+
+  // Error curves (skip t = 0 and zero values, a log axis can't show them)
+  const errPts = pts => pts
+    .map(p => ({ x: p.x, y: Math.abs(p.y - exactStep(K, A, tau, p.x)) }))
+    .filter(p => p.x > 0 && p.y > 0);
+  const errDatasets = [
+    { label: 'Euler error', data: errPts(euler), borderColor: '#dd6b20', backgroundColor: '#dd6b20', borderWidth: 1.5, pointRadius: 3, showLine: true },
+    { label: 'RK4 error', data: errPts(rk4), borderColor: '#38a169', backgroundColor: '#38a169', borderWidth: 1.5, pointRadius: 3, pointStyle: 'rectRot', showLine: true }
+  ];
+
+  if (!odeChart) {
+    odeChart = new Chart($('odeChart'), {
+      type: 'scatter',
+      data: { datasets: datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+          x: { type: 'linear', title: { display: true, text: 'Time (seconds)' } },
+          y: { title: { display: true, text: 'Output y(t)' } }
+        }
+      }
+    });
+  } else {
+    odeChart.data.datasets = datasets;
+    odeChart.update();
+  }
+
+  if (!errChart) {
+    errChart = new Chart($('errChart'), {
+      type: 'scatter',
+      data: { datasets: errDatasets },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+          x: { type: 'linear', title: { display: true, text: 'Time (seconds)' } },
+          y: {
+            type: 'logarithmic',
+            title: { display: true, text: '|error| (log scale)' },
+            ticks: {
+              // Label only the powers of ten, in short form (1e-3 instead of 0.00100000000)
+              callback: v => Math.abs(Math.log10(v) - Math.round(Math.log10(v))) < 1e-6 ? v.toExponential(0) : ''
+            }
+          }
+        }
+      }
+    });
+  } else {
+    errChart.data.datasets = errDatasets;
+    errChart.update();
+  }
+}
+
+['gainK', 'tau', 'amp', 'stepH'].forEach(id => $(id).addEventListener('input', update));
+$('predBtn').addEventListener('click', checkPrediction);
+update();
+</script>
+</body>
+</html>
