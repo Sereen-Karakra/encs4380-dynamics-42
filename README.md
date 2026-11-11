@@ -40,9 +40,21 @@ Implemented in this project package (push to GitHub before the 9 Nov checkpoint)
 
 The sine plot uses the **steady-state** solution; it intentionally omits the start-up transient.
 
-### Module 3: Second-order response (`module3.html`)
-Done. See the page for details.
+## Module 3: Second-order response (module3.html)
 
+Mass-spring-damper model: m·x″ + b·x′ + k·x = F, G(s) = K·ωn² / (s² + 2ζωn·s + ωn²), with K = 1/k, ωn = √(k/m), ζ = b / (2√(km)).
+
+- Sliders for mass m, damping b, stiffness k, and step force F; all plots and numbers update live.
+- Shows ωn, ζ, the damping case (underdamped, critically damped, overdamped), DC gain K, and the final value F/k.
+- Step response x(t) from the closed-form solution for each damping case, with the final value line and the peak marked.
+- Metrics read from the plotted curve: rise time (10–90%), peak time, overshoot, and 2% settling time, shown next to the theoretical overshoot and peak time.
+- Pole plot in the s-plane: complex pair for ζ < 1, real poles for ζ ≥ 1.
+- State-space panel: x1 = x, x2 = x′, with matrices A, B, C and the eigenvalues of A, which match the poles of G(s).
+- Phase plane (x1, x2) computed with our own RK4 integrator: a spiral when underdamped, no spiral when overdamped.
+- "Predict, then check" box: what happens to the overshoot when damping b increases.
+- Validation table with expected value, our value, and PASS/FAIL: ζ = 0.5 overshoot (16.3 %), ζ = 1 has no overshoot, and eigenvalues of A equal the poles (−1 ± j1.732 for m = 1, b = 2, k = 4).
+- The number of plot points is increased for very low damping so the oscillations are drawn smoothly.
+  
 ### Module 4: "Guess the sensor" challenge (`module4.html`)
 
 - Random first-order or underdamped second-order sensors.
@@ -101,6 +113,7 @@ Open `index.html` or the GitHub Pages home URL. Use the module navigation across
 ## AI use
 
 We used an AI assistant (Claude) as allowed by the homework. Maysam used it to review the Module 1 code and fix errors (ramp steady-state error for K ≠ 1, the error-fraction plot, markers, and the validation table), and to help write the issue and this README. Every member must be able to explain their own code and equations in the demo.
+Sereen used Claude to review the Module 3 code (equations, poles, eigenvalues, RK4) and to find and fix an under-sampling problem in the plots for very small damping. She can explain the model, the equations, and the plots in the demo.
 Raneem used ChatGPT for coding assistance, debugging, and explanations in Module 4.
 Masa used Claude to help build the bonus page (`bonus.html`): the Euler and RK4 implementation, the error plot, and the "Predict, then check" box. She checked the results against the closed-form formula and can explain the solver steps and error orders in the demo.
 
