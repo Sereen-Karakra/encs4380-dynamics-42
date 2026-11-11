@@ -12,7 +12,7 @@ Interactive web toolkit that makes the dynamic characteristics of sensors visibl
 | Dania Abu Ayyash  | Module 2: First-order frequency response  |   #3  | Done   |
 | Sereen Karakra    | Module 3: Second-order response           |   #1  | Done   |
 | Raneem Khawaja    | Module 4: "Guess the sensor" challenge    |   #3  | Done   |
-| Masa Awad         | Bonus work                                |       | Planned|
+| Masa Awad         | Bonus: own ODE solver (Euler and RK4) vs closed-form (`bonus.html`) |  #4   | Done   |
 
 ## Modules
 
@@ -59,9 +59,18 @@ Done. See the page for details.
 - The running score is stored in sessionStorage for the browser tab.
 - Responsive layout for desktop and mobile screens.
 
+### Bonus: Own ODE solver vs closed-form (`bonus.html`)
+Our own numerical solver for the first-order sensor ODE τ·dy/dt + y = K·A, y(0) = 0, compared with the exact step response y(t) = K·A·(1 − e^(−t/τ)). This is the "your own ODE solver (Euler or RK4), plotted against the closed-form curve" bonus option.
+
+- Both Euler and RK4 are implemented from scratch in JavaScript (no solver library).
+- Sliders for gain K, time constant τ, step amplitude A, and step size h.
+- Plot of the exact curve, the Euler points, and the RK4 points.
+- Log-scale error plot |numerical − exact| for both methods, and metrics for the maximum error of each (plus the number of steps and h/τ).
+- "Predict, then check" box on how the errors change when h is halved: Euler is first-order (error ∝ h), RK4 is fourth-order (error ∝ h⁴).
+
 ## Opening and navigation
 
-Open `index.html` or the GitHub Pages home URL. Use the module navigation across the top to open Module 2 or Module 3.Module 4 is available through the navigation as "Guess the sensor".
+Open `index.html` or the GitHub Pages home URL. Use the module navigation across the top to open Module 2 or Module 3. Module 4 is available through the navigation as "Guess the sensor", and the bonus page as "Bonus · ODE solver" (`bonus.html`).
 
 ## Screenshots
 
@@ -79,18 +88,21 @@ Open `index.html` or the GitHub Pages home URL. Use the module navigation across
 
 <img width="648" height="282" alt="image" src="https://github.com/user-attachments/assets/10816c70-94c1-4ab8-97c2-a3715dfd5f92" />
 
+<img width="1290" height="809" alt="image" src="https://github.com/user-attachments/assets/639dcfff-6569-48e0-9656-6eb5111cacca" />
 
 
 ## Technical notes
 
 - Static site on GitHub Pages: plain HTML and JavaScript, no server or login needed.
 - Plots use the closed-form responses from the lecture slides, drawn with [Chart.js](https://www.chartjs.org/).
+- The bonus page also uses numerical solutions (Euler and RK4) written by us and compared against the closed-form curve.
 - Work is tracked with one GitHub Issue per module, assigned to its owner.
 
 ## AI use
 
 We used an AI assistant (Claude) as allowed by the homework. Maysam used it to review the Module 1 code and fix errors (ramp steady-state error for K ≠ 1, the error-fraction plot, markers, and the validation table), and to help write the issue and this README. Every member must be able to explain their own code and equations in the demo.
 Raneem used ChatGPT for coding assistance, debugging, and explanations in Module 4.
+Masa used Claude to help build the bonus page (`bonus.html`): the Euler and RK4 implementation, the error plot, and the "Predict, then check" box. She checked the results against the closed-form formula and can explain the solver steps and error orders in the demo.
 
 ## Timeline
 
