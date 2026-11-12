@@ -102,6 +102,14 @@ Open `index.html` or the GitHub Pages home URL. Use the module navigation across
 
 <img width="1290" height="809" alt="image" src="https://github.com/user-attachments/assets/639dcfff-6569-48e0-9656-6eb5111cacca" />
 
+![Screenshot 1](screenshots/png1.png)
+
+![Screenshot 2](screenshots/png2.png)
+
+![Screenshot 3](screenshots/png3.png)
+
+![Screenshot 4](screenshots/png4.png)
+
 
 ## Technical notes
 
