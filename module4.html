@@ -54,43 +54,7 @@ input[type="number"] {
   max-width: 100%;
 }
 
-@media (max-width: 600px) {
-  body {
-    padding: 10px;
-  }
 
-  .card {
-    padding: 14px;
-  }
-
-  h1 {
-    font-size: 24px;
-  }
-
-  .toolkit-nav a {
-    font-size: 14px;
-  }
-
-  label {
-    display: block;
-    margin-bottom: 8px;
-  }
-
-  input[type="number"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 12px;
-  }
-
-  button {
-    padding: 10px 14px;
-    margin: 4px 0;
-  }
-
-  .chart-container {
-    height: 280px;
-  }
-}
     .toolkit-nav {
   max-width: 1000px;
   margin: 0 auto 20px;
@@ -137,6 +101,44 @@ input[type="number"] {
       position: relative;
       height: 350px;
     }
+
+    @media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .toolkit-nav a {
+    font-size: 14px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  button {
+    padding: 10px 14px;
+    margin: 4px 0;
+  }
+
+  .chart-container {
+    height: 280px;
+  }
+}
   </style>
 </head>
 
@@ -461,8 +463,8 @@ if (sineInput && sensorChart) {
       : relativeError(tauEstimate, tau);
 
     const roundScore = error <= 10
-      ? 100
-      : Math.max(0, Math.round(100 - (error - 10)));
+  ? 100
+  : Math.min(99, Math.max(0, Math.round(100 - (error - 10))));
 
     const details = secondOrder
       ? "True zeta: " + zeta.toFixed(3) +
