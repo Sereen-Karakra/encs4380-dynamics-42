@@ -32,7 +32,8 @@ th, td { border:1px solid #cbd5e0; padding:6px 10px; text-align:left; }
   <a href="index.html">Module 1 · Time</a>
   <a href="module2.html">Module 2 · Frequency</a>
   <a href="module3.html" aria-current="page">Module 3 · Second order</a>
-  <span title="Module 4 is being developed">Module 4 · Coming soon</span>
+  <a href="module4.html">Module 4 · Guess the sensor</a>
+  <a href="bonus.html">Bonus · ODE solver</a>
 </nav>
 <div class="card">
   <p><a href="index.html">&larr; Back to toolkit</a></p>
@@ -184,7 +185,7 @@ function update() {
   $('tPeak').innerText = zeta < 1 ? fmt(Math.PI / (wn * Math.sqrt(1 - zeta * zeta))) + ' s' : 'none';
 
   // Step response
-  const N = 500, curve = [];
+  const N = 3000, curve = [];
   for (let i = 0; i <= N; i++) { const t = tMax * i / N; curve.push({ x: t, y: fin * secondOrderStep(zeta, wn, t) }); }
   stepChart.data.datasets[0].data = [{ x: 0, y: fin }, { x: tMax, y: fin }];
   stepChart.data.datasets[1].data = curve;
@@ -203,7 +204,7 @@ function update() {
   const cx = e => e[1] === 0 ? fmt(e[0]) : `${fmt(e[0])} ${e[1] > 0 ? '+' : '-'} j${fmt(Math.abs(e[1]))}`;
   $('ssBox').innerHTML = `A = [ 0 &nbsp; 1 ; ${fmt(-k / m, 2)} &nbsp; ${fmt(-b / m, 2)} ]<br>B = [ 0 ; ${fmt(1 / m, 2)} ], &nbsp; C = [ 1 &nbsp; 0 ]`;
   $('eigLine').innerHTML = `<b>Eigenvalues of A:</b> ${cx(ev[0])}, ${cx(ev[1])} &nbsp;|&nbsp; <b>Poles of G(s):</b> ${cx(pl[0])}, ${cx(pl[1])} &nbsp;&rarr; same numbers`;
-  pChart.data.datasets[0].data = rk4Path(A, B, F, tMax);
+  pChart.data.datasets[0].data = rk4Path(A, B, F, tMax, 3000);
   pChart.update();
 }
 
