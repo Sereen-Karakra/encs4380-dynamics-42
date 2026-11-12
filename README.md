@@ -112,8 +112,9 @@ Open `index.html` or the GitHub Pages home URL. Use the module navigation across
 
 ## AI use
 
-We used an AI assistant (Claude) as allowed by the homework. Maysam used it to review the Module 1 code and fix errors (ramp steady-state error for K ≠ 1, the error-fraction plot, markers, and the validation table), and to help write the issue and this README. Every member must be able to explain their own code and equations in the demo.
+We used an AI assistant (Claude and ChatGPT) as allowed by the homework. Maysam used it to review the Module 1 code and fix errors (ramp steady-state error for K ≠ 1, the error-fraction plot, markers, and the validation table), and to help write the issue and this README. Every member must be able to explain their own code and equations in the demo.
 Sereen used Claude to review the Module 3 code (equations, poles, eigenvalues, RK4) and to find and fix an under-sampling problem in the plots for very small damping. She can explain the model, the equations, and the plots in the demo.
+Dania used ChatGPT to help develop and debug Module 2 (First-order Frequency Response), including interactive sliders, sine wave and Bode plots, frequency-response calculations, and validation checks. She tested the results and can explain the equations and code in the demo.
 Raneem used ChatGPT for coding assistance, debugging, and explanations in Module 4.
 Masa used Claude to help build the bonus page (`bonus.html`): the Euler and RK4 implementation, the error plot, and the "Predict, then check" box. She checked the results against the closed-form formula and can explain the solver steps and error orders in the demo.
 
