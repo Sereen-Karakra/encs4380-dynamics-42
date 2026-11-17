@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ENCS4380 Homework 2 PID Control Toolkit: interactive modules, Micromouse system, and optional bonus.">
+<title>ENCS4380 | Control Toolkit (Homework 2)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; margin:0; padding:16px; background:#f4f7f6; color:#333; }
+  h1,h2,h3 { color:#1a365d; }
+  p { line-height:1.55; }
+  .card { background:#fff; padding:18px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,.1); max-width:1000px; margin:0 auto 16px; }
+  .toolkit-nav { max-width:1000px; margin:0 auto 16px; display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+  .toolkit-nav a { padding:8px 12px; background:#fff; color:#1a365d; border-radius:6px; border:1px solid #cbd5e0; text-decoration:none; font-size:.92em; }
+  .toolkit-nav a:hover,.toolkit-nav a[aria-current="page"] { background:#1a365d; color:#fff; }
+  .intro { margin-bottom:8px; }
+  .eyebrow { font-size:.85rem; color:#4a5568; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+  .hint { color:#4a5568; font-size:.93rem; }
+  .module-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(235px,1fr)); gap:14px; }
+  .module { border:1px solid #cbd5e0; border-radius:8px; padding:15px; background:#fff; display:flex; flex-direction:column; min-height:208px; }
+  .module h3 { margin:0 0 6px; font-size:1.13rem; }
+  .module p { margin:5px 0 14px; font-size:.91rem; }
+  .module header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  .pill { border-radius:30px; padding:4px 9px; font-size:.75rem; background:#edf2f7; color:#4a5568; font-weight:600; white-space:nowrap; }
+  .pill.ready { background:#e7f3e9; color:#276749; }
+  .action { margin-top:auto; display:inline-block; align-self:flex-start; background:#2b6cb0; color:#fff; text-decoration:none; padding:9px 14px; border-radius:5px; font-size:.92rem; font-weight:600; }
+  .action:hover { background:#2c5282; }
+  .not-ready { margin-top:auto; display:inline-block; background:#edf2f7; color:#718096; padding:9px 14px; border-radius:5px; font-size:.92rem; font-weight:600; }
+  .note { background:#edf2f7; padding:12px 14px; border-radius:6px; }
+  ul { padding-left:21px; line-height:1.7; }
+  footer { max-width:1000px; margin:18px auto 26px; color:#718096; font-size:.85rem; text-align:center; }
+  @media(max-width:550px) { body { padding:10px; } .card { padding:14px; } .module-grid { grid-template-columns:1fr; } .module { min-height:unset; } }
+</style>
+</head>
+<body>
+<nav class="toolkit-nav" aria-label="Toolkit modules">
+  <a href="index.html">Module 1 · Time</a>
+  <a href="module2.html">Module 2 · Frequency</a>
+  <a href="module3.html">Module 3 · Second order</a>
+  <a href="module4.html">Module 4 · Guess the sensor</a>
+  <a href="bonus.html">Bonus · ODE solver (HW1)</a>
+  <a href="control.html" aria-current="page">Control · Homework 2</a>
+</nav>
+<main>
+<section class="card">
+  <div class="eyebrow">ENCS4380 · Interfacing Techniques · Birzeit University</div>
+  <h1>Homework 2: PID Control Toolkit</h1>
+  <p class="intro">Explore feedback control using interactive simulations. Start with the PID playground, examine sensor delay, implement a digital PID, and test your tuning skills.</p>
+  <p class="hint">This section extends <a href="index.html">Homework 1: Dynamic Characteristics</a>.
+<section class="card">
+  <h2>Control modules</h2>
+  <p class="hint">Each module will become clickable automatically after its HTML file is uploaded to this same GitHub repository. Unavailable pages are shown as “Not uploaded yet”, so there are no broken links.</p>
+  <div class="module-grid">
+    <article class="module" data-file="pid-playground.html">
+      <header><span class="eyebrow">P1 · 20 points</span><span class="pill" data-status>Checking…</span></header>
+      <h3>PID Playground</h3>
+      <p>Compare first- and second-order plants. Change Kp, Ki, Kd and the setpoint; examine the response, control limits and validation checks.</p>
+      <div data-action></div>
+    </article>
+    <article class="module" data-file="slow-sensor.html">
+      <header><span class="eyebrow">P2 · 15 points</span><span class="pill" data-status>Checking…</span></header>
+      <h3>A Slow Sensor in the Loop</h3>
+      <p>Compare actual output with sensor feedback and discover how sensor time constant changes overshoot and stability.</p>
+      <div data-action></div>
+    </article>
+    <article class="module" data-file="digital-pid.html">
+      <header><span class="eyebrow">P3 · 15 points</span><span class="pill" data-status>Checking…</span></header>
+      <h3>Digital PID</h3>
+      <p>Change sampling time, observe stair-step control, toggle anti-windup, and generate Arduino loop code.</p>
+      <div data-action></div>
+    </article>
+    <article class="module" data-file="tuning-challenge.html">
+      <header><span class="eyebrow">P4 · 10 points</span><span class="pill" data-status>Checking…</span></header>
+      <h3>Tuning Challenge</h3>
+      <p>Try to tune a randomly selected hidden plant to meet the target overshoot, settling-time and error requirements.</p>
+      <div data-action></div>
+    </article>
+  </div>
+</section>
+<section class="card">
+  <h2>Applying PID to our project</h2>
+  <div class="module-grid">
+    <article class="module" data-file="my-system.html">
+      <header><span class="eyebrow">My System · 15 points</span><span class="pill" data-status>Checking…</span></header>
+      <h3>Micromouse Drive Motor</h3>
+      <p>Document the measured or cited motor model (K, τ), the chosen specifications, final PID gains, simulated response and Arduino code.</p>
+      <div data-action></div>
+    </article>
+  </div>
+</section>
+<section class="card">
+  <h2>Homework 2 · Optional Bonus</h2>
+  <p class="hint">Reserved for the group's extra-credit work (up to 10 bonus points). This is separate from the <a href="bonus.html">Homework 1 ODE Solver bonus</a>.</p>
+  <div class="module-grid">
+    <article class="module" data-file="control-bonus.html">
+      <header><span class="eyebrow">Bonus · up to 10 extra points</span><span class="pill" data-status>Checking…</span></header>
+      <h3>Control Bonus</h3>
+      <p>Possible choices from the assignment: real-hardware PID testing, Ziegler–Nichols tuning, or state-space control. The group chooses its implementation.</p>
+      <div data-action></div>
+    </article>
+  </div>
+</section>
+<section class="card">
+  <h2>Using this page as a team</h2>
+  <div class="note">
+    <p style="margin-top:0">Put each teammate's HTML file in the repository root, next to <code>index.html</code> and <code>control.html</code>. Use these exact filenames:</p>
+    <ul>
+      <li><code>pid-playground.html</code> — P1</li>
+      <li><code>slow-sensor.html</code> — P2</li>
+      <li><code>digital-pid.html</code> — P3</li>
+      <li><code>tuning-challenge.html</code> — P4</li>
+      <li><code>my-system.html</code> — project application</li>
+      <li><code>control-bonus.html</code> — Homework 2 bonus</li>
+    </ul>
+    <p style="margin-bottom:0">For consistent navigation, include a <code>&lt;a href="control.html"&gt;Control · Homework 2&lt;/a&gt;</code> link inside each module's navigation bar.</p>
+  </div>
+</section>
+</main>
+<footer>ENCS4380 · PID Control Toolkit · Homework 2</footer>
+<script>
+// On GitHub Pages, enable each module only after its file exists.
+async function setModuleStatus(card) {
+  const filename = card.dataset.file;
+  const status = card.querySelector('[data-status]');
+  const action = card.querySelector('[data-action]');
+  let exists = false;
+  if (window.location.protocol === 'file:') {
+    // Local file previews cannot reliably request sibling files.
+    exists = filename === 'pid-playground.html';
+  } else {
+    try {
+      const response = await fetch(filename, { method:'HEAD', cache:'no-store' });
+      exists = response.ok && (response.headers.get('content-type') || '').includes('text/html');
+    } catch (error) {
+      exists = false;
+    }
+  }
+  status.textContent = exists ? 'Available' : 'Not uploaded yet';
+  status.classList.toggle('ready', exists);
+  if (exists) {
+    const link = document.createElement('a');
+    link.className = 'action';
+    link.href = filename;
+    link.textContent = 'Open module';
+    action.replaceChildren(link);
+  } else {
+    const label = document.createElement('span');
+    label.className = 'not-ready';
+    label.textContent = 'Coming soon';
+    action.replaceChildren(label);
+  }
+}
+document.querySelectorAll('[data-file]').forEach(setModuleStatus);
+</script>
+</body>
+</html>

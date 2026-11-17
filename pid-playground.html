@@ -1,0 +1,1265 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENCS4380 Homework 2 | P1 PID Playground</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+  color-scheme: light;
+  --navy:#172d4b;
+  --navy-light:#27496c;
+  --blue:#2563a9;
+  --teal:#087e87;
+  --teal-soft:#eaf8f8;
+  --background:#f2f6fa;
+  --card:#fff;
+  --ink:#263748;
+  --muted:#607389;
+  --line:#dbe5ee;
+  --shadow:0 10px 26px rgba(22,45,76,.06);
+}
+
+* { box-sizing:border-box; }
+
+html { scroll-behavior:smooth; }
+
+body {
+  margin:0;
+  padding:22px 16px 44px;
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+  background:var(--background);
+  color:var(--ink);
+}
+
+h1,h2,h3,p { margin-top:0; }
+
+h1 {
+  font-size:clamp(1.85rem,3.4vw,2.65rem);
+  letter-spacing:-.035em;
+  line-height:1.18;
+  margin:12px 0;
+}
+
+h2 {
+  font-size:1.24rem;
+  letter-spacing:-.01em;
+  color:var(--navy);
+  margin-bottom:21px;
+}
+
+h3 {
+  color:var(--navy-light);
+  font-size:1.03rem;
+  margin:22px 0 10px;
+}
+
+p { line-height:1.65; }
+a { color:var(--blue); }
+
+.toolkit-nav {
+  max-width:1080px;
+  margin:0 auto 18px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.toolkit-nav a {
+  padding:10px 13px;
+  background:white;
+  color:var(--navy-light);
+  border:1px solid var(--line);
+  border-radius:10px;
+  text-decoration:none;
+  font-size:.84rem;
+  font-weight:600;
+  transition:.15s;
+}
+
+.toolkit-nav a:hover,
+.toolkit-nav a[aria-current="page"] {
+  background:var(--navy);
+  color:white;
+  border-color:var(--navy);
+}
+
+.card {
+  max-width:1080px;
+  margin:0 auto 18px;
+  background:var(--card);
+  padding:clamp(19px,3vw,30px);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+}
+
+.hero {
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(
+    120deg,#142c4b 0%,#21466f 72%,#176d7b 100%
+  );
+  border:0;
+  color:#f7fbff;
+  padding:35px;
+}
+
+.hero:after {
+  content:"";
+  position:absolute;
+  width:260px;
+  height:260px;
+  right:-105px;
+  top:-140px;
+  border-radius:50%;
+  border:45px solid rgba(255,255,255,.045);
+  pointer-events:none;
+}
+
+.hero h1 {
+  color:white;
+  max-width:780px;
+}
+
+.hero p {
+  color:#dce8f4;
+  max-width:790px;
+  margin-bottom:16px;
+}
+
+.eyebrow {
+  color:#91e2e2;
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  font-weight:800;
+}
+
+.hero-meta {
+  color:#edf5fc;
+  font-size:.9rem;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.hero-meta span {
+  display:inline-block;
+  padding:7px 11px;
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:30px;
+  background:rgba(255,255,255,.08);
+}
+
+.section-title {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.section-title h2 { margin:0; }
+
+.section-num {
+  flex:0 0 auto;
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:var(--teal-soft);
+  color:var(--teal);
+  font-weight:800;
+  font-size:.9rem;
+}
+
+.controls {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+
+.controls > div {
+  min-width:0;
+  padding:14px 14px 11px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fbfdff;
+}
+
+.controls label {
+  display:block;
+  font-weight:700;
+  color:var(--navy);
+  margin-bottom:9px;
+  font-size:.86rem;
+  line-height:1.4;
+}
+
+input[type=range] {
+  width:100%;
+  accent-color:var(--teal);
+  cursor:pointer;
+}
+
+select {
+  width:100%;
+  padding:9px;
+  border:1px solid #becfdf;
+  border-radius:8px;
+  background:white;
+  color:var(--navy);
+  font:inherit;
+  font-size:.92rem;
+}
+
+.group-title { margin:22px 0 11px; }
+
+.formula {
+  font-family:Consolas,'Courier New',monospace;
+  color:#294a69;
+  background:#f0f6fa;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:13px 15px;
+  overflow-x:auto;
+  font-size:.87rem;
+}
+
+.note {
+  color:var(--muted);
+  font-size:.88rem;
+}
+
+#activeMode {
+  margin:18px 0 0;
+  padding:10px 13px;
+  border-radius:9px;
+  background:var(--teal-soft);
+  color:#116a72;
+}
+
+.diagram-shell {
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#fbfdff,#f5f9fd);
+  border-radius:13px;
+  padding:14px;
+  overflow-x:auto;
+}
+
+.loop-svg {
+  display:block;
+  min-width:800px;
+  max-width:1020px;
+  width:100%;
+  margin:0 auto;
+}
+
+.loop-svg text {
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+}
+
+.diagram-caption {
+  margin:10px 0 0;
+  font-size:.85rem;
+  color:var(--muted);
+}
+
+.prediction-box {
+  background:#f9fbff;
+  border:1px solid #cddfeb;
+  border-left:4px solid var(--teal);
+  padding:18px;
+  border-radius:11px;
+}
+
+.prediction-box p { margin-bottom:13px; }
+
+.prediction-box label {
+  display:block;
+  cursor:pointer;
+  padding:11px 13px;
+  background:white;
+  border:1px solid var(--line);
+  border-radius:9px;
+  margin:8px 0;
+  transition:.15s;
+}
+
+.prediction-box label:hover {
+  border-color:#78adb5;
+  background:#f3fbfc;
+}
+
+.prediction-box input { accent-color:var(--teal); }
+
+button {
+  background:var(--blue);
+  color:white;
+  border:0;
+  padding:11px 17px;
+  border-radius:9px;
+  cursor:pointer;
+  margin-top:8px;
+  font:inherit;
+  font-weight:700;
+}
+
+button:hover { background:#174e86; }
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline:3px solid #89cde0;
+  outline-offset:2px;
+}
+
+#predictionResult {
+  margin:12px 0 0;
+  font-weight:600;
+  color:#285f63;
+}
+
+.metrics {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+
+.metric {
+  background:#f5f9fc;
+  border:1px solid var(--line);
+  border-top:3px solid var(--teal);
+  padding:16px;
+  border-radius:12px;
+}
+
+.metric b {
+  display:block;
+  color:var(--muted);
+  font-size:.79rem;
+  min-height:2.6em;
+}
+
+.metric strong {
+  font-size:1.55rem;
+  letter-spacing:-.025em;
+  color:var(--navy);
+  display:block;
+  margin-top:8px;
+  font-variant-numeric:tabular-nums;
+}
+
+.chart-container {
+  position:relative;
+  height:320px;
+  margin:14px auto 19px;
+}
+
+.chart-panel {
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:18px 18px 7px;
+  margin:18px 0;
+}
+
+.chart-panel h3 { margin:0 0 8px; }
+
+table {
+  border-collapse:separate;
+  border-spacing:0;
+  width:100%;
+  font-size:.9rem;
+}
+
+.table-wrap {
+  max-width:100%;
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:11px;
+}
+
+th,td {
+  padding:13px 14px;
+  text-align:left;
+  border-bottom:1px solid var(--line);
+  min-width:120px;
+}
+
+tr:last-child td { border-bottom:0; }
+
+th {
+  color:var(--navy);
+  background:#eef4f9;
+  white-space:nowrap;
+}
+
+.pass {
+  color:#14744b;
+  font-weight:800;
+}
+
+.fail {
+  color:#bf3636;
+  font-weight:800;
+}
+
+.hidden { display:none; }
+
+.footer-links {
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+}
+
+.footer-links a {
+  font-weight:700;
+  text-decoration:none;
+}
+
+.footer-links a:hover { text-decoration:underline; }
+
+@media(max-width:800px) {
+  .controls {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .metrics {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:550px) {
+  body { padding:10px 9px 25px; }
+  .hero { padding:24px 18px; }
+  .card { padding:18px 14px; border-radius:14px; }
+  .controls { grid-template-columns:1fr; gap:10px; }
+  .metric { padding:12px; }
+  .metric strong { font-size:1.25rem; }
+  .chart-container { height:265px; }
+  .chart-panel { padding:12px 6px; }
+  .toolkit-nav a { font-size:.78rem; padding:8px 10px; }
+  .diagram-shell { padding:8px; }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="toolkit-nav" aria-label="Toolkit modules">
+  <a href="index.html">Module 1 · Time</a>
+  <a href="module2.html">Module 2 · Frequency</a>
+  <a href="module3.html">Module 3 · Second order</a>
+  <a href="module4.html">Module 4 · Guess the sensor</a>
+  <a href="bonus.html">Bonus · ODE solver</a>
+  <a href="control.html">Control · Homework 2</a>
+  <a href="pid-playground.html" aria-current="page">
+    P1 · PID Playground
+  </a>
+</nav>
+
+<section class="card hero">
+  <div class="eyebrow">
+    ENCS4380 · Interfacing Techniques · Homework 2
+  </div>
+  <h1>P1 · PID Playground</h1>
+  <p>
+    Experiment with proportional, integral, and derivative control.
+    Adjust the gains, compare your output with the setpoint,
+    and see feedback control in action.
+  </p>
+  <div class="hero-meta">
+    <span>Developed by Dania Abu Ayyash</span>
+    <span>Live RK4 simulation</span>
+    <span>First &amp; second-order plants</span>
+  </div>
+</section>
+
+<section class="card">
+  <div class="section-title">
+    <span class="section-num">01</span>
+    <h2>Choose a plant and PID gains</h2>
+  </div>
+
+  <div class="controls">
+    <div>
+      <label for="plant">Plant model</label>
+      <select id="plant">
+        <option value="first">First order (Module 1)</option>
+        <option value="second">Second order (Module 3)</option>
+      </select>
+    </div>
+    <div>
+      <label for="kp">Proportional Kp:
+        <span id="vkp"></span>
+      </label>
+      <input id="kp" type="range" min="0" max="20"
+             step="0.1" value="9">
+    </div>
+    <div>
+      <label for="ki">Integral Ki:
+        <span id="vki"></span>
+      </label>
+      <input id="ki" type="range" min="0" max="10"
+             step="0.1" value="0">
+    </div>
+    <div>
+      <label for="kd">Derivative Kd:
+        <span id="vkd"></span>
+      </label>
+      <input id="kd" type="range" min="0" max="10"
+             step="0.1" value="0">
+    </div>
+    <div>
+      <label for="ref">Setpoint step:
+        <span id="vref"></span>
+      </label>
+      <input id="ref" type="range" min="0.5" max="5"
+             step="0.5" value="1">
+    </div>
+    <div>
+      <label for="limit">Control limit |u| ≤
+        <span id="vlimit"></span>
+      </label>
+      <input id="limit" type="range" min="1" max="30"
+             step="1" value="20">
+    </div>
+  </div>
+
+  <div id="firstControls">
+    <h3 class="group-title">First-order plant</h3>
+    <div class="formula">
+      G(s) = K / (τs + 1), &nbsp; τ dy/dt + y = K u
+    </div>
+    <div class="controls">
+      <div>
+        <label for="K">Plant gain K:
+          <span id="vK"></span>
+        </label>
+        <input id="K" type="range" min="0.5" max="5"
+               step="0.1" value="1">
+      </div>
+      <div>
+        <label for="tau">Time constant τ (s):
+          <span id="vtau"></span>
+        </label>
+        <input id="tau" type="range" min="0.5" max="10"
+               step="0.5" value="1">
+      </div>
+    </div>
+  </div>
+
+  <div id="secondControls" class="hidden">
+    <h3 class="group-title">
+      Second-order mass-spring-damper (Module 3)
+    </h3>
+    <div class="formula">
+      m y'' + b y' + k y = u; &nbsp;
+      K = 1/k, &nbsp; ωn = √(k/m),
+      &nbsp; ζ = b/(2√(km))
+    </div>
+    <div class="controls">
+      <div>
+        <label for="m">Mass m:
+          <span id="vm"></span>
+        </label>
+        <input id="m" type="range" min="0.5" max="5"
+               step="0.1" value="1">
+      </div>
+      <div>
+        <label for="b">Damping b:
+          <span id="vb"></span>
+        </label>
+        <input id="b" type="range" min="0.2" max="12"
+               step="0.2" value="2">
+      </div>
+      <div>
+        <label for="k">Stiffness k:
+          <span id="vk"></span>
+        </label>
+        <input id="k" type="range" min="0.5" max="12"
+               step="0.5" value="4">
+      </div>
+    </div>
+    <p class="note" id="secondDerived"></p>
+  </div>
+  <p class="note" id="activeMode"></p>
+</section>
+
+<section class="card">
+  <div class="section-title">
+    <span class="section-num">02</span>
+    <h2>Closed-loop block diagram</h2>
+  </div>
+
+  <div class="diagram-shell">
+    <svg class="loop-svg" viewBox="0 0 1020 254"
+         role="img"
+         aria-label="PID closed-loop diagram with negative unity feedback">
+      <defs>
+        <marker id="loopArrow" viewBox="0 0 10 10"
+                refX="9" refY="5"
+                markerWidth="7" markerHeight="7"
+                orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 Z" fill="#47779c"/>
+        </marker>
+      </defs>
+
+      <g stroke="#47779c" stroke-width="2.6" fill="none"
+         marker-end="url(#loopArrow)">
+        <path d="M144 100 H179"/>
+        <path d="M226 100 H263"/>
+        <path d="M425 100 H458"/>
+        <path d="M589 100 H620"/>
+        <path d="M759 100 H790"/>
+        <path d="M927 100 H968"/>
+        <path d="M968 100 V207 H202 V124"/>
+      </g>
+
+      <g font-size="17" text-anchor="middle" font-weight="700">
+
+        <rect x="18" y="64" width="126" height="72"
+              rx="12" fill="#e7f1fc"
+              stroke="#4677a6" stroke-width="2"/>
+        <text x="81" y="91" fill="#22446b">Setpoint</text>
+        <text x="81" y="115" fill="#22446b"
+              font-weight="500">r(t)</text>
+
+        <circle cx="203" cy="100" r="23" fill="#fff"
+                stroke="#47779c" stroke-width="2.5"/>
+        <text x="203" y="108" font-size="26"
+              fill="#22446b">Σ</text>
+        <text x="179" y="82" font-size="15"
+              fill="#087e87">+</text>
+        <text x="182" y="151" font-size="20"
+              fill="#ba4b51">−</text>
+
+        <rect x="263" y="64" width="162" height="72"
+              rx="12" fill="#dceff0"
+              stroke="#087e87" stroke-width="2"/>
+        <text x="344" y="92"
+              fill="#075f66">PID Controller</text>
+        <text x="344" y="116" fill="#075f66"
+              font-weight="500">Kp · Ki · Kd</text>
+
+        <rect x="458" y="64" width="131" height="72"
+              rx="12" fill="#fff"
+              stroke="#47779c" stroke-width="2"/>
+        <text x="523.5" y="92"
+              fill="#22446b">Limiter</text>
+        <text x="523.5" y="116" fill="#22446b"
+              font-weight="500">±Umax</text>
+
+        <rect x="620" y="64" width="139" height="72"
+              rx="12" fill="#e7f1fc"
+              stroke="#47779c" stroke-width="2"/>
+        <text x="689.5" y="92"
+              fill="#22446b">Plant</text>
+        <text x="689.5" y="116" fill="#22446b"
+              font-weight="500">G(s)</text>
+
+        <rect x="790" y="64" width="137" height="72"
+              rx="12" fill="#fff"
+              stroke="#47779c" stroke-width="2"/>
+        <text x="858.5" y="92"
+              fill="#22446b">Output</text>
+        <text x="858.5" y="116" fill="#22446b"
+              font-weight="500">y(t)</text>
+      </g>
+
+      <circle cx="968" cy="100" r="5" fill="#087e87"/>
+      <text x="560" y="237" font-size="17"
+            font-weight="700" fill="#087e87"
+            text-anchor="middle">
+        Negative unity feedback · e(t) = r(t) − y(t)
+      </text>
+    </svg>
+  </div>
+
+  <p class="diagram-caption">
+    The measured output returns to the summing junction,
+    where it is subtracted from the setpoint.
+  </p>
+
+  <p class="formula">
+    u(t) = clip(Kp·e(t) + Ki·∫e(t)dt − Kd·dy(t)/dt,
+    −Umax, +Umax)
+  </p>
+  <p class="note">
+    Derivative is taken from the measured output to avoid
+    a derivative kick when the setpoint steps.
+    The plant receives the saturated signal;
+    integration is continuous (RK4).
+    P1 does not include the P3 anti-windup switch.
+  </p>
+</section>
+
+<section class="card">
+  <div class="section-title">
+    <span class="section-num">03</span>
+    <h2>Predict, then check</h2>
+  </div>
+  <div class="prediction-box">
+    <p>
+      <b>Prediction:</b> For a stable unsaturated step response,
+      what can adding integral action (Ki &gt; 0) do?
+    </p>
+    <label>
+      <input type="radio" name="prediction" value="a">
+      A. Always makes overshoot exactly zero
+    </label>
+    <label>
+      <input type="radio" name="prediction" value="b">
+      B. Eliminates steady-state error
+    </label>
+    <label>
+      <input type="radio" name="prediction" value="c">
+      C. Completely removes the need for feedback
+    </label>
+    <button id="checkPrediction">Check my prediction</button>
+    <p id="predictionResult" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="card">
+  <div class="section-title">
+    <span class="section-num">04</span>
+    <h2>Live response and performance</h2>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <b>Rise time (10–90%)</b>
+      <strong id="rise">—</strong>
+    </div>
+    <div class="metric">
+      <b>Overshoot</b>
+      <strong id="overshoot">—</strong>
+    </div>
+    <div class="metric">
+      <b>Settling time (2%)</b>
+      <strong id="settling">—</strong>
+    </div>
+    <div class="metric">
+      <b>Steady-state error (simulated)</b>
+      <strong id="sse">—</strong>
+    </div>
+  </div>
+
+  <p class="note" id="metricNote"></p>
+
+  <div class="chart-panel">
+    <h3>Output y(t) versus setpoint r(t)</h3>
+    <div class="chart-container">
+      <canvas id="outputChart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-panel">
+    <h3>Control signal u(t) and saturation limits</h3>
+    <div class="chart-container">
+      <canvas id="controlChart"></canvas>
+    </div>
+  </div>
+
+  <p class="note" id="limitNote"></p>
+</section>
+
+<section class="card">
+  <div class="section-title">
+    <span class="section-num">05</span>
+    <h2>Validation checks (from Homework 2)</h2>
+  </div>
+  <p class="note">
+    These checks use independent known settings;
+    they do not change your current sliders.
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Validation case</th>
+          <th>Expected</th>
+          <th>Calculated</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody id="validationBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <p class="note">
+    <b>Implementation:</b>
+    The controller uses proportional and integral error
+    plus derivative on measured output.
+    The plant and integral state are integrated by RK4
+    at small time steps. All slider settings are evaluated live;
+    no server required. Saturation and too-aggressive gains
+    can worsen the response and prevent settling.
+  </p>
+  <div class="footer-links">
+    <a href="control.html">← Back to Control Toolkit</a>
+    <a href="index.html">Homework 1 toolkit</a>
+  </div>
+</section>
+
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+const fmt = (x, n = 3) =>
+  Number.isFinite(x) ? x.toFixed(n) : 'n/a';
+
+const clip = (x, a, b) =>
+  Math.max(a, Math.min(b, x));
+
+function settings() {
+  const plant = $('plant').value;
+  const m = +$('m').value;
+  const b = +$('b').value;
+  const k = +$('k').value;
+
+  return {
+    plant,
+    kp:+$('kp').value,
+    ki:+$('ki').value,
+    kd:+$('kd').value,
+    ref:+$('ref').value,
+    limit:+$('limit').value,
+    K:plant === 'first' ? +$('K').value : 1/k,
+    tau:+$('tau').value,
+    m,b,k,
+    wn:Math.sqrt(k/m),
+    zeta:b/(2*Math.sqrt(k*m))
+  };
+}
+
+function derivative(c, x) {
+  const y=x[0];
+  const v=x[1];
+  const integral=x[2];
+  const e=c.ref-y;
+  const pi=c.kp*e+c.ki*integral;
+
+  if (c.plant === 'first') {
+    const dyUnsat=(c.K*pi-y)/(c.tau+c.K*c.kd);
+    const raw=pi-c.kd*dyUnsat;
+    const u=clip(raw,-c.limit,c.limit);
+    const dy=(c.K*u-y)/c.tau;
+
+    return {dx:[dy,0,e],u,raw};
+  }
+
+  const raw=pi-c.kd*v;
+  const u=clip(raw,-c.limit,c.limit);
+
+  return {
+    dx:[v,(u-c.b*v-c.k*y)/c.m,e],
+    u,raw
+  };
+}
+
+function vectorAdd(x,dx,h) {
+  return x.map((v,i)=>v+h*dx[i]);
+}
+
+function simulate(c, N=6000, requestedT=null) {
+  const tMax=requestedT ?? Math.min(100,Math.max(
+    12,
+    c.plant === 'first'
+      ? 8*c.tau
+      : 10/Math.max(.15,c.zeta*c.wn),
+    c.ki>0 ? 10/Math.max(.1,c.ki*c.K) : 0
+  ));
+
+  const h=tMax/N;
+  const pts=[];
+  const x=[0,0,0];
+
+  let satCount=0;
+  let peak=-Infinity;
+  let maxRaw=0;
+
+  for(let i=0;i<=N;i++) {
+    const t=i*h;
+    const a=derivative(c,x);
+
+    pts.push({t,y:x[0],u:a.u});
+    peak=Math.max(peak,x[0]);
+    maxRaw=Math.max(maxRaw,Math.abs(a.raw));
+
+    if(Math.abs(a.raw)>c.limit+1e-9) {
+      satCount++;
+    }
+
+    if(i===N) break;
+
+    const k1=a.dx;
+    const k2=derivative(c,vectorAdd(x,k1,h/2)).dx;
+    const k3=derivative(c,vectorAdd(x,k2,h/2)).dx;
+    const k4=derivative(c,vectorAdd(x,k3,h)).dx;
+
+    for(let j=0;j<3;j++) {
+      x[j]+=h*(k1[j]+2*k2[j]+2*k3[j]+k4[j])/6;
+    }
+
+    if(!x.every(Number.isFinite) ||
+       Math.abs(x[0])>1e8) break;
+  }
+
+  return {
+    pts,tMax,peak,
+    satFraction:satCount/(N+1),
+    maxRaw
+  };
+}
+
+function readMetrics(c, sim) {
+  const pts=sim.pts;
+
+  const fin=c.ki>0
+    ? clip(c.ref,-c.K*c.limit,c.K*c.limit)
+    : clip(
+        c.K*c.kp*c.ref/(1+c.K*c.kp),
+        -c.K*c.limit,c.K*c.limit
+      );
+
+  const cross=level=>{
+    for(let i=1;i<pts.length;i++) {
+      const a=pts[i-1];
+      const b=pts[i];
+
+      if(a.y<level && b.y>=level && b.y>a.y) {
+        return a.t+
+          (level-a.y)*(b.t-a.t)/(b.y-a.y);
+      }
+    }
+    return NaN;
+  };
+
+  const ten=cross(.1*fin);
+  const ninety=cross(.9*fin);
+
+  const rise=
+    Number.isFinite(ten)&&Number.isFinite(ninety)
+      ? ninety-ten : NaN;
+
+  const overshoot=fin>1e-8
+    ? Math.max(0,(sim.peak-fin)/fin)*100
+    : NaN;
+
+  const band=Math.max(.02*Math.abs(fin),1e-5);
+  let lastOutside=-1;
+
+  for(let i=0;i<pts.length;i++) {
+    if(Math.abs(pts[i].y-fin)>band) {
+      lastOutside=i;
+    }
+  }
+
+  const settled=
+    lastOutside<pts.length-1 &&
+    Number.isFinite(pts.at(-1).y);
+
+  const settling=settled
+    ? (lastOutside<0 ? 0 : pts[lastOutside+1].t)
+    : NaN;
+
+  const n=Math.min(100,pts.length);
+  const tail=pts.slice(-n);
+
+  const yEnd=
+    tail.reduce((s,p)=>s+p.y,0)/n;
+
+  const sse=c.ref-yEnd;
+
+  return {
+    rise,overshoot,settling,sse,fin,yEnd
+  };
+}
+
+const graphOpts=(ylab)=>({
+  responsive:true,
+  maintainAspectRatio:false,
+  animation:false,
+  parsing:false,
+  interaction:{
+    intersect:false,
+    mode:'nearest'
+  },
+  scales:{
+    x:{
+      type:'linear',
+      title:{
+        display:true,
+        text:'Time (s)'
+      }
+    },
+    y:{
+      title:{
+        display:true,
+        text:ylab
+      }
+    }
+  }
+});
+
+const makeLine=(label,color,dashed=false)=>({
+  label,
+  data:[],
+  borderColor:color,
+  backgroundColor:color,
+  borderWidth:2,
+  borderDash:dashed?[6,5]:[],
+  pointRadius:0,
+  showLine:true,
+  tension:0
+});
+
+const outputChart=new Chart($('outputChart'),{
+  type:'line',
+  data:{
+    datasets:[
+      makeLine('Setpoint r(t)','#c53030',true),
+      makeLine('Output y(t)','#3182ce')
+    ]
+  },
+  options:graphOpts('Output / setpoint')
+});
+
+const controlChart=new Chart($('controlChart'),{
+  type:'line',
+  data:{
+    datasets:[
+      makeLine('Control u(t)','#3182ce'),
+      makeLine('+Umax','#c53030',true),
+      makeLine('−Umax','#c53030',true)
+    ]
+  },
+  options:graphOpts('Control signal u')
+});
+
+function update() {
+  const c=settings();
+
+  ['kp','ki','kd','ref','limit',
+   'K','tau','m','b','k'].forEach(id=>{
+    $('v'+id).textContent=
+      Number($(id).value).toFixed(
+        id==='limit'?0:1
+      );
+  });
+
+  $('firstControls').classList.toggle(
+    'hidden',c.plant!=='first'
+  );
+
+  $('secondControls').classList.toggle(
+    'hidden',c.plant!=='second'
+  );
+
+  $('secondDerived').textContent=
+    `Derived gain K = ${fmt(c.K)}, `+
+    `ωn = ${fmt(c.wn)} rad/s, `+
+    `ζ = ${fmt(c.zeta)}.`;
+
+  $('activeMode').textContent=
+    c.plant==='first'
+      ? 'Using Homework 1 Module 1 plant: K/(τs + 1).'
+      : 'Using Homework 1 Module 3 mass-spring-damper plant: 1/(ms² + bs + k).';
+
+  const sim=simulate(c);
+  const mt=readMetrics(c,sim);
+
+  $('rise').textContent=
+    Number.isFinite(mt.rise)
+      ? fmt(mt.rise)+' s'
+      : 'not reached';
+
+  $('overshoot').textContent=
+    Number.isFinite(mt.overshoot)
+      ? fmt(mt.overshoot,2)+' %'
+      : 'n/a';
+
+  $('settling').textContent=
+    Number.isFinite(mt.settling)
+      ? fmt(mt.settling)+' s'
+      : 'not settled';
+
+  $('sse').textContent=
+    `${fmt(mt.sse,4)} `+
+    `(${fmt(100*mt.sse/c.ref,2)} %)`;
+
+  $('metricNote').textContent=
+    `Rise time: 10–90% of expected final output `+
+    `(${fmt(mt.fin,3)}). `+
+    `Overshoot and ±2% settling band use that `+
+    `same final output. The displayed steady-state `+
+    `error is estimated from the last samples over `+
+    `a ${fmt(sim.tMax,1)} s simulation; a slow or `+
+    `unstable response may not yet be at steady state.`;
+
+  $('limitNote').textContent=
+    `Control signal limit: −${fmt(c.limit,1)} `+
+    `to +${fmt(c.limit,1)}. Saturation occurs `+
+    `at about ${fmt(100*sim.satFraction,1)}% `+
+    `of simulated points. Peak raw controller `+
+    `demand: ${fmt(sim.maxRaw,2)}.`;
+
+  const sampled=sim.pts.filter(
+    (_,i)=>i%6===0 || i===sim.pts.length-1
+  );
+
+  const toSeries=(fn)=>
+    sampled.map(p=>({x:p.t,y:fn(p)}));
+
+  const border=[
+    {x:0,y:c.ref},
+    {x:sim.tMax,y:c.ref}
+  ];
+
+  outputChart.data.datasets[0].data=border;
+  outputChart.data.datasets[1].data=
+    toSeries(p=>p.y);
+  outputChart.update();
+
+  controlChart.data.datasets[0].data=
+    toSeries(p=>p.u);
+
+  controlChart.data.datasets[1].data=[
+    {x:0,y:c.limit},
+    {x:sim.tMax,y:c.limit}
+  ];
+
+  controlChart.data.datasets[2].data=[
+    {x:0,y:-c.limit},
+    {x:sim.tMax,y:-c.limit}
+  ];
+
+  controlChart.update();
+}
+
+function validation() {
+  const base={
+    plant:'first',
+    K:1,tau:1,
+    kp:9,ki:0,kd:0,
+    ref:1,limit:20,
+    m:1,b:2,k:4,
+    wn:2,zeta:.5
+  };
+
+  let c={...base};
+  let s=simulate(c,8000,15);
+  let mt=readMetrics(c,s);
+
+  const target=.9*(1-Math.exp(-1));
+  let time63=NaN;
+
+  for(let i=1;i<s.pts.length;i++) {
+    if(s.pts[i].y>=target) {
+      const a=s.pts[i-1];
+      const b=s.pts[i];
+
+      time63=a.t+
+        (target-a.y)*(b.t-a.t)/(b.y-a.y);
+      break;
+    }
+  }
+
+  const err1=
+    Math.abs((c.ref-mt.yEnd)/c.ref)*100;
+
+  const ok1=
+    Math.abs(time63-.1)<.002 &&
+    Math.abs(err1-10)<.05;
+
+  c={...base,kp:1,ki:1};
+
+  const omega=
+    Math.sqrt(c.K*c.ki/c.tau);
+
+  const zeta=
+    (1+c.K*c.kp)/
+    (2*Math.sqrt(c.tau*c.K*c.ki));
+
+  const ok2=
+    Math.abs(omega-1)<1e-9 &&
+    Math.abs(zeta-1)<1e-9;
+
+  s=simulate(c,8000,30);
+  mt=readMetrics(c,s);
+
+  const ok3=Math.abs(mt.sse)<.001;
+
+  const rows=[
+    [
+      '1. P only: K=1, τ=1, Kp=9',
+      'τcl = 0.100 s; SSE = 10%',
+      `τcl = ${fmt(time63,3)} s; `+
+      `SSE = ${fmt(err1,2)}%`,
+      ok1
+    ],
+    [
+      '2. PI: K=1, τ=1, Kp=1, Ki=1',
+      'ωn = 1 rad/s; ζ = 1',
+      `ωn = ${fmt(omega,3)} rad/s; `+
+      `ζ = ${fmt(zeta,3)}`,
+      ok2
+    ],
+    [
+      '3. PI step: numerical long-run error',
+      'Steady-state error → 0',
+      `Error at t = 30 s: ${fmt(mt.sse,6)}`,
+      ok3
+    ]
+  ];
+
+  $('validationBody').innerHTML=
+    rows.map(r=>
+      `<tr>`+
+      `<td>${r[0]}</td>`+
+      `<td>${r[1]}</td>`+
+      `<td>${r[2]}</td>`+
+      `<td class="${r[3]?'pass':'fail'}">`+
+      `${r[3]?'PASS':'FAIL'}</td>`+
+      `</tr>`
+    ).join('');
+
+  return {ok1,ok2,ok3};
+}
+
+$('checkPrediction').addEventListener('click',()=>{
+  const answer=document.querySelector(
+    'input[name="prediction"]:checked'
+  );
+
+  $('predictionResult').textContent=
+    !answer
+      ? 'Please choose an answer first.'
+      : (answer.value==='b'
+          ? 'Correct! '
+          : 'Not quite. ')+
+        'Integral action can remove steady-state error '+
+        'for a stable, unsaturated step response; '+
+        'it can also increase overshoot.';
+});
+
+[
+  'plant','kp','ki','kd','ref','limit',
+  'K','tau','m','b','k'
+].forEach(id=>$(id).addEventListener('input',update));
+
+validation();
+update();
+</script>
+
+</body>
+</html>
