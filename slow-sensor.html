@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ENCS4380 Homework 2 | P2 A Slow Sensor in the Loop</title>
+<meta name="description" content="Explore how sensor response time affects closed-loop stability, overshoot, and measurement accuracy.">
+<title>Sensor Delay Lab | Dynamics &amp; Control</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{color-scheme:light;--navy:#172d4b;--navy-light:#27496c;--blue:#2563a9;--teal:#087e87;--teal-soft:#eaf8f8;--background:#f2f6fa;--card:#fff;--ink:#263748;--muted:#607389;--line:#dbe5ee;--shadow:0 10px 26px rgba(22,45,76,.06)}
@@ -78,35 +79,79 @@ th{color:var(--navy);background:#eef4f9;white-space:nowrap}
 .footer-links a:hover{text-decoration:underline}
 @media(max-width:800px){.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:550px){body{padding:10px 9px 25px}.hero{padding:24px 18px}.card{padding:18px 14px;border-radius:14px}.controls{grid-template-columns:1fr;gap:10px}.metric{padding:12px}.metric strong{font-size:1.2rem}.chart-container{height:270px}.chart-container.short{height:190px}.chart-panel{padding:12px 6px}.toolkit-nav a{font-size:.78rem;padding:8px 10px}}
+
+/* Shared Dynamics & Control visual identity */
+:root { --bg:#f2f6fa; --muted:#64748b; --line:#dfe8f0; }
+body { padding:0; background:var(--bg); }
+.site-header { background:#fff; border-bottom:1px solid var(--line); }
+.navbar { width:min(1120px,calc(100% - 40px)); margin:auto; min-height:76px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.brand { display:flex; align-items:center; gap:12px; color:var(--navy); font-weight:800; text-decoration:none; }
+.brand-icon { width:38px; height:38px; display:grid; place-items:center; background:linear-gradient(135deg,var(--navy),var(--teal)); color:#fff; border-radius:11px; font-size:22px; }
+.brand small { display:block; font-size:11px; letter-spacing:.15em; color:var(--muted); margin-top:3px; }
+.nav-links { display:flex; align-items:center; flex-wrap:wrap; gap:7px; }
+.nav-links a { color:#52667b; text-decoration:none; font-size:14px; font-weight:600; padding:10px 13px; border-radius:9px; }
+.nav-links a:hover { background:#edf4fa; }
+.nav-links .current { background:var(--navy); color:white; }
+.page-shell { width:min(1120px,calc(100% - 40px)); margin:0 auto 35px; }
+.page-shell .card { max-width:none; margin:18px 0; border-radius:18px; padding:27px 30px; box-shadow:0 7px 24px #19334d09; }
+.page-shell .hero { margin-top:28px; padding:40px 44px; border-radius:22px; background:linear-gradient(118deg,#142b48,#244d70 65%,#0d737b); box-shadow:0 18px 38px #19334d15; }
+.page-shell .hero h1 { font-size:clamp(35px,4.8vw,54px); letter-spacing:-.045em; line-height:1.1; margin:13px 0; }
+.page-shell .hero p { font-size:15px; line-height:1.7; max-width:750px; }
+.page-shell .hero-meta span { border-radius:30px; font-size:12px; font-weight:700; }
+.section-title { margin-bottom:23px; }
+.section-title h2 { font-size:clamp(23px,3vw,29px); letter-spacing:-.025em; margin:7px 0 0; }
+.kicker { color:var(--teal); font-size:12px; letter-spacing:.14em; text-transform:uppercase; font-weight:800; }
+.controls>div { background:#f8fbfd; padding:16px; }
+.chart-panel { padding:18px; }
+.chart-panel h3 { font-size:18px; }
+.metric { background:#f8fbfd; }
+.quick-label { font-size:13px; font-weight:700; color:var(--navy); }
+.site-footer { border-top:1px solid var(--line); color:var(--muted); padding:25px 0 35px; font-size:13px; }
+.footer-flex { width:min(1120px,calc(100% - 40px)); margin:auto; display:flex; flex-wrap:wrap; justify-content:space-between; gap:16px; }
+.footer-flex a { color:var(--navy); text-decoration:none; font-weight:700; }
+.footer-flex a:hover { text-decoration:underline; }
+@media(max-width:850px) { .navbar { flex-direction:column; align-items:flex-start; padding:16px 0; } }
+@media(max-width:600px) {
+  .navbar,.page-shell,.footer-flex { width:calc(100% - 24px); }
+  .nav-links a { font-size:12px; padding:8px 9px; }
+  .page-shell .hero { margin-top:14px; padding:28px 22px; border-radius:16px; }
+  .page-shell .card { padding:21px 16px; }
+  .page-shell .hero h1 { font-size:36px; }
+}
+@media(prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
 </style>
 </head>
 <body>
 
-<nav class="toolkit-nav" aria-label="Toolkit modules">
-  <a href="index.html">Module 1 · Time</a>
-  <a href="module2.html">Module 2 · Frequency</a>
-  <a href="module3.html">Module 3 · Second order</a>
-  <a href="module4.html">Module 4 · Guess the sensor</a>
-  <a href="bonus.html">Bonus · ODE solver</a>
-  <a href="control.html">Control · Homework 2</a>
-  <a href="pid-playground.html">P1 · PID Playground</a>
-  <a href="slow-sensor.html" aria-current="page">P2 · Slow Sensor</a>
-</nav>
+<header class="site-header">
+  <nav class="navbar" aria-label="Main navigation">
+    <a class="brand" href="index.html">
+      <span class="brand-icon">∿</span>
+      <span>Dynamics &amp; Control<small>ENCS4380 · BIRZEIT UNIVERSITY</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Dynamics Toolkit</a>
+      <a href="control.html">Control Lab</a>
+      <a href="pid-playground.html">PID Playground</a>
+      <a href="slow-sensor.html" class="current" aria-current="page">Sensor Delay</a>
+    </div>
+  </nav>
+</header>
+<main class="page-shell">
 
 <section class="card hero">
-  <div class="eyebrow">ENCS4380 · Interfacing Techniques · Homework 2</div>
-  <h1>P2 · A Slow Sensor in the Loop</h1>
-  <p>The controller only controls what the sensor says. Make the sensor slower and watch the true output overshoot, ring, and finally oscillate, while the sensor reading still looks calm.</p>
+  <div class="eyebrow">Interactive Control Systems / Module 02</div>
+  <h1>Sensor Delay Lab</h1>
+  <p>What happens when a controller relies on delayed measurements? Compare the real response with what the sensor reports, adjust the sensor time constant and explore how feedback timing affects stability.</p>
   <div class="hero-meta">
-    <span>Developed by Sereen Karakra </span>
-    <span>P2 · 15 points</span>
+    <span>Real output vs. sensor reading</span>
+    <span>Interactive feedback experiments</span>
     <span>Live RK4 simulation</span>
-    <span>First &amp; second-order plants</span>
   </div>
 </section>
 
 <section class="card">
-  <div class="section-title"><span class="section-num">01</span><h2>Choose the sensor, plant and PID gains</h2></div>
+  <div class="section-title"><div><div class="kicker">Experiment & explore</div><h2>Configure sensor & controller</h2></div></div>
   <div class="controls">
     <div><label for="tauS">Sensor time constant τs (s): <span id="vtauS"></span></label>
       <input id="tauS" type="range" min="0.02" max="5" step="0.01" value="0.05"></div>
@@ -125,7 +170,7 @@ th{color:var(--navy);background:#eef4f9;white-space:nowrap}
         <option value="first">First order (Module 1)</option>
         <option value="second">Second order (Module 3)</option>
       </select></div>
-    <div><label class="check" for="aw"><input id="aw" type="checkbox" checked> Anti-windup (stop integrating while saturated)</label></div>
+    <div><label class="check" for="aw"><input id="aw" type="checkbox" checked> Anti-windup (conditional integration)</label></div>
   </div>
 
   <div id="firstControls">
@@ -154,11 +199,11 @@ th{color:var(--navy);background:#eef4f9;white-space:nowrap}
   </div>
 
   <div class="presets">
-    <span>Quick scenarios:</span>
+    <span>Explore scenarios:</span>
     <button class="alt" data-preset="fast">Fast sensor</button>
     <button class="alt" data-preset="mid">Medium sensor</button>
     <button class="alt" data-preset="slow">Slow sensor</button>
-    <button class="alt" data-preset="osc">Slow sensor + PI (oscillates)</button>
+    <button class="alt" data-preset="osc">Slow sensor + PI (instability demo)</button>
   </div>
 
   <h3>System equations</h3>
@@ -169,36 +214,40 @@ th{color:var(--navy);background:#eef4f9;white-space:nowrap}
 </section>
 
 <section class="card">
-  <div class="section-title"><span class="section-num">02</span><h2>Closed-loop block diagram</h2></div>
+  <div class="section-title"><div><div class="kicker">Feedback architecture</div><h2>Inside the feedback loop</h2></div></div>
   <div class="diagram-shell">
-    <svg class="loop-svg" viewBox="0 0 900 270" role="img" aria-label="Setpoint enters the PID controller, limiter and plant. The sensor measures the plant output and feeds it back to the summing junction.">
-      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#47779c"/></marker></defs>
-      <g stroke="#47779c" stroke-width="2.5" fill="none" marker-end="url(#arr)">
-        <path d="M125 85 H212"/><path d="M258 85 H285"/><path d="M405 85 H430"/><path d="M510 85 H545"/><path d="M675 85 H705"/>
-        <path d="M835 85 V215 H235 V110"/>
-      </g>
-      <g font-size="16" text-anchor="middle" font-weight="700">
-        <rect x="15" y="52" width="110" height="66" rx="10" fill="#e7f1fc" stroke="#4677a6" stroke-width="2"/>
-        <text x="70" y="80" fill="#22446b">Setpoint</text><text x="70" y="101" fill="#22446b" font-weight="500">r(t)</text>
-        <circle cx="235" cy="85" r="23" fill="#fff" stroke="#47779c" stroke-width="2.5"/><text x="235" y="93" font-size="24" fill="#22446b">Σ</text>
-        <text x="212" y="66" fill="#087e87" font-size="15">+</text><text x="218" y="135" fill="#ba4b51" font-size="20">−</text>
-        <rect x="285" y="52" width="120" height="66" rx="10" fill="#dceff0" stroke="#087e87" stroke-width="2"/>
-        <text x="345" y="80" fill="#075f66">PID</text><text x="345" y="101" fill="#075f66" font-weight="500">Kp · Ki · Kd</text>
-        <rect x="430" y="52" width="80" height="66" rx="10" fill="#fff" stroke="#47779c" stroke-width="2"/>
-        <text x="470" y="80" fill="#22446b">Limiter</text><text x="470" y="101" fill="#22446b" font-weight="500">±Umax</text>
-        <rect x="545" y="52" width="130" height="66" rx="10" fill="#e7f1fc" stroke="#47779c" stroke-width="2"/>
-        <text x="610" y="80" fill="#22446b">Plant</text><text x="610" y="101" fill="#22446b" font-weight="500">true output y(t)</text>
-        <rect x="705" y="52" width="130" height="66" rx="10" fill="#fff4e5" stroke="#c28a37" stroke-width="2"/>
-        <text x="770" y="80" fill="#805719">Slow sensor</text><text x="770" y="101" fill="#805719" font-weight="500">τs → yₛ(t)</text>
-      </g>
-      <text x="535" y="250" font-size="16" font-weight="700" fill="#087e87" text-anchor="middle">Feedback uses the measured output yₛ(t), not the true output y(t)</text>
-    </svg>
+    <svg class="loop-svg" viewBox="0 0 900 270" role="img" aria-label="Setpoint enters the summing junction, PID controller, limiter, plant, and true output. A branch sends true output to a slow sensor in the negative feedback path.">
+  <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#47779c"/></marker></defs>
+  <g stroke="#47779c" stroke-width="2.5" fill="none" marker-end="url(#arr)">
+    <path d="M120 88 H179"/><path d="M225 88 H250"/><path d="M388 88 H410"/><path d="M505 88 H532"/><path d="M658 88 H730"/>
+    <path d="M696 88 V204 H646"/><path d="M510 204 H202 V114"/>
+  </g>
+  <g font-size="16" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-weight="700">
+    <rect x="10" y="55" width="110" height="66" rx="10" fill="#e7f1fc" stroke="#4677a6" stroke-width="2"/>
+    <text x="65" y="83" fill="#22446b">Setpoint</text><text x="65" y="105" fill="#22446b" font-weight="500">r(t)</text>
+    <circle cx="202" cy="88" r="23" fill="#fff" stroke="#47779c" stroke-width="2.5"/>
+    <text x="202" y="95" fill="#22446b" font-size="25">Σ</text>
+    <text x="179" y="67" fill="#087e87">+</text><text x="178" y="138" fill="#ba4b51" font-size="20">−</text>
+    <rect x="250" y="55" width="138" height="66" rx="10" fill="#dceff0" stroke="#087e87" stroke-width="2"/>
+    <text x="319" y="83" fill="#075f66">PID Controller</text><text x="319" y="104" fill="#075f66" font-size="13" font-weight="500">Kp · Ki · Kd</text>
+    <rect x="410" y="55" width="95" height="66" rx="10" fill="#fff" stroke="#47779c" stroke-width="2"/>
+    <text x="457" y="83" fill="#22446b">Limiter</text><text x="457" y="104" fill="#22446b" font-weight="500">±Umax</text>
+    <rect x="532" y="55" width="126" height="66" rx="10" fill="#e7f1fc" stroke="#47779c" stroke-width="2"/>
+    <text x="595" y="83" fill="#22446b">Plant</text><text x="595" y="104" fill="#22446b" font-weight="500">G(s)</text>
+    <rect x="730" y="55" width="155" height="66" rx="10" fill="#fff" stroke="#47779c" stroke-width="2"/>
+    <text x="807" y="83" fill="#22446b">True output</text><text x="807" y="104" fill="#22446b" font-weight="500">y(t)</text>
+    <rect x="510" y="171" width="136" height="66" rx="10" fill="#fff4e5" stroke="#c28a37" stroke-width="2"/>
+    <text x="578" y="198" fill="#805719">Slow sensor</text><text x="578" y="221" fill="#805719" font-weight="500">τₛ → yₛ(t)</text>
+  </g>
+  <circle cx="696" cy="88" r="5" fill="#087e87"/>
+  <text x="410" y="262" font-size="14" font-weight="700" fill="#087e87" text-anchor="middle">Controller feedback: measured yₛ(t), not true y(t)</text>
+</svg>
   </div>
-  <p class="note" style="margin:10px 0 0">The sensor sits in the feedback path. Everything the controller knows about the plant has first passed through it.</p>
+  <p class="note" style="margin:10px 0 0">The plant output is available as y(t). Only the sensor measurement yₛ(t) returns to the controller, so delays in the feedback path affect the response.</p>
 </section>
 
 <section class="card">
-  <div class="section-title"><span class="section-num">03</span><h2>Predict, then check</h2></div>
+  <div class="section-title"><div><div class="kicker">Predict, then check</div><h2>Predict the response</h2></div></div>
   <div class="prediction-box">
     <p><b>Prediction:</b> Keep your current gains and make the sensor much slower (τs from 0.05 s to 1 s). What happens to the overshoot of the <b>true</b> output y?</p>
     <label><input type="radio" name="prediction" value="up"> A. It increases, and the loop may start to ring or oscillate</label>
@@ -210,12 +259,12 @@ th{color:var(--navy);background:#eef4f9;white-space:nowrap}
 </section>
 
 <section class="card">
-  <div class="section-title"><span class="section-num">04</span><h2>Compare true output and sensor reading</h2></div>
+  <div class="section-title"><div><div class="kicker">Live simulation</div><h2>Real output vs. sensor readings</h2></div></div>
   <div class="metrics">
     <div class="metric"><b>Overshoot of true output y</b><strong id="overshoot">—</strong></div>
     <div class="metric"><b>Rise time (10–90%)</b><strong id="rise">—</strong></div>
     <div class="metric"><b>Settling time (2%)</b><strong id="settling">—</strong></div>
-    <div class="metric"><b>Steady-state error (simulated)</b><strong id="sse">—</strong></div>
+    <div class="metric"><b>End-of-run tracking error</b><strong id="sse">—</strong></div>
   </div>
   <div id="verdict" class="verdict" aria-live="polite"></div>
   <p class="note" id="metricNote" style="margin-top:12px"></p>
@@ -232,16 +281,16 @@ th{color:var(--navy);background:#eef4f9;white-space:nowrap}
 </section>
 
 <section class="card">
-  <div class="section-title"><span class="section-num">05</span><h2>Why a slow sensor causes oscillation</h2></div>
-  <p>The controller reacts to an out-of-date picture of the output. By the time the sensor reports that the target is reached, the plant has already moved past it, so the controller keeps pushing. A larger τs adds phase lag to the loop and removes damping.</p>
+  <div class="section-title"><div><div class="kicker">Understand the behavior</div><h2>Why delay affects stability</h2></div></div>
+  <p>The controller reacts to a delayed view of the true output. The plant can pass the target before the measurement catches up, causing overshoot and ringing. Increasing the sensor time constant adds phase lag and can reduce closed-loop damping.</p>
   <p class="formula">Plant τ·dy/dt = K·u − y, P control only: (τs + 1)(τs·s + 1) + K·Kp = 0<br>ωn = √((1 + K·Kp)/(τ·τs)), &nbsp; ζ = (τ + τs) / (2·√(τ·τs·(1 + K·Kp)))</p>
   <p class="note" id="zetaNote"></p>
-  <p class="note">The sensor also adds a zero to the response from r to y, so the real overshoot is larger than the ζ-based formula for a plain second-order system. The ringing frequency still follows ωn and ζ.</p>
-  <p class="note"><b>Important:</b> with P only and a first-order plant, a slow sensor adds ringing but never makes the loop unstable. Add integral action (Ki), derivative action, or a second-order plant, and the loop can become unstable. Try the “Slow sensor + PI” scenario.</p>
+  <p class="note">The true-output transfer function includes a zero, so a standard second-order overshoot formula does not directly predict the real overshoot. The ringing frequency still follows ωn and ζ.</p>
+  <p class="note"><b>Important:</b> For a first-order plant with positive P-only gain, the linear closed loop remains stable even if the sensor becomes slow, although ringing may increase. Other controller and plant combinations can become unstable. Try the “Slow sensor + PI” scenario.</p>
 </section>
 
 <section class="card">
-  <div class="section-title"><span class="section-num">06</span><h2>Validation checks</h2></div>
+  <div class="section-title"><div><div class="kicker">Model accuracy</div><h2>Verification</h2></div></div>
   <p class="note">These checks use independent known settings and do not change your sliders.</p>
   <div class="table-wrap">
     <table>
@@ -251,14 +300,13 @@ th{color:var(--navy);background:#eef4f9;white-space:nowrap}
   </div>
 </section>
 
-<section class="card">
-  <p class="note"><b>Implementation:</b> the plant, sensor and integral states are integrated together with RK4 (step ≤ 2 ms). The derivative term uses dyₛ/dt = (y − yₛ)/τs directly, so no numerical differentiation is needed. Anti-windup is conditional integration: the integral stops growing while the output is saturated and the error pushes it further. Everything runs in the browser, no server required.</p>
-  <div class="footer-links">
-    <a href="control.html">← Back to Control Toolkit</a>
-    <a href="pid-playground.html">P1 PID Playground</a>
-    <a href="index.html">Homework 1 toolkit</a>
+</main>
+<footer class="site-footer">
+  <div class="footer-flex">
+    <span>Dynamics &amp; Control · ENCS4380 · Birzeit University · Module by Sereen Karakra</span>
+    <span><a href="control.html">← Control Lab</a> &nbsp; · &nbsp; <a href="pid-playground.html">PID Playground</a> &nbsp; · &nbsp; <a href="index.html">Dynamics Toolkit</a></span>
   </div>
-</section>
+</footer>
 
 <script>
 'use strict';
@@ -319,7 +367,8 @@ function simulate(c, tMax = autoTime(c)){
 
 function metrics(c, sim){
   const p = sim.pts, n = p.length;
-  const fin = c.ki > 0 ? c.ref : c.K*c.kp*c.ref/(1 + c.K*c.kp);
+  const unsat = c.ki > 0 ? c.ref : c.K*c.kp*c.ref/(1 + c.K*c.kp);
+  const fin = clip(unsat, -c.K*c.limit, c.K*c.limit);
   const cross = lvl => {
     for(let i = 1; i < n; i++) if(p[i-1].y < lvl && p[i].y >= lvl)
       return p[i-1].t + (lvl - p[i-1].y)*(p[i].t - p[i-1].t)/(p[i].y - p[i-1].y);
@@ -378,12 +427,12 @@ function update(){
   $('sse').textContent = `${fmt(mt.sse, 3)} (${fmt(100*mt.sse/c.ref, 1)} %)`;
   const v = $('verdict'), vd = VERDICT[mt.state];
   v.className = 'verdict ' + vd[0]; v.textContent = vd[1];
-  $('metricNote').textContent = `Metrics are measured on the true output y against its expected final value (${fmt(mt.fin, 3)}), over ${fmt(sim.tMax, 0)} s. The steady-state error is estimated from the last samples, so an oscillating response is not yet at steady state.`;
+  $('metricNote').textContent = `Metrics use the true output y and a reference level of ${fmt(mt.fin,3)} (accounting for control limits), over ${fmt(sim.tMax,0)} s. The displayed tracking error is computed from the last samples; it is not a steady-state value while the response is oscillating or unstable.`;
   $('limitNote').textContent = `Control limit ±${fmt(c.limit, 0)}. The raw controller demand exceeds it for about ${fmt(100*sim.satFraction, 1)}% of the run (peak demand ${fmt(sim.maxRaw, 1)}).`;
 
   if(c.plant === 'first' && c.ki === 0 && c.kd === 0){
     const z = (c.tau + c.tauS)/(2*Math.sqrt(c.tau*c.tauS*(1 + c.K*c.kp)));
-    $('zetaNote').innerHTML = `Live for the current P-only loop: <b>ζ = ${fmt(z, 2)}</b> ` + (z < .4 ? '(very underdamped, expect strong ringing).' : z < 1 ? '(underdamped).' : '(well damped, no overshoot).');
+    $('zetaNote').innerHTML = `Live for the current P-only loop: <b>ζ = ${fmt(z, 2)}</b> ` + (z < .4 ? '(very underdamped, expect strong ringing).' : z < 1 ? '(underdamped).' : '(well damped; check actual overshoot on the plot).');
   } else {
     $('zetaNote').textContent = 'With Ki, Kd or a second-order plant the loop has more than two poles, so this ζ formula no longer applies. Read the behaviour from the plot.';
   }
@@ -411,7 +460,7 @@ const PRESETS = {
   osc:{tauS:4, kp:5, ki:8, kd:0, K:1, tau:1, ref:1, limit:20}
 };
 document.querySelectorAll('[data-preset]').forEach(btn => btn.addEventListener('click', () => {
-  const p = PRESETS[btn.dataset.preset];
+  const p = {...PRESETS[btn.dataset.preset]};
   $('plant').value = 'first'; $('aw').checked = true;
   if(btn.dataset.preset !== 'osc'){ p.kp = 9; p.ki = 0; p.kd = 0; p.K = 1; p.tau = 1; p.ref = 1; p.limit = 20; }
   Object.keys(p).forEach(k => $(k).value = p[k]);
@@ -428,7 +477,7 @@ $('checkPrediction').addEventListener('click', () => {
   const truth = grew ? 'up' : (Math.abs(mb.overshoot - ma.overshoot) <= 2 ? 'same' : 'down');
   out.textContent = (sel.value === truth ? 'Correct! ' : 'Not quite. ') +
     `With your current settings, the overshoot goes from ${fmt(ma.overshoot, 1)}% (τs = 0.05 s) to ${fmt(mb.overshoot, 1)}% (τs = 1 s). ` +
-    'The controller acts on a reading that is already out of date, so it keeps pushing and the true output overshoots.';
+    (grew ? 'Here, extra sensor lag increases overshoot or ringing.' : 'For these gains, the change is not strongly destabilizing; try the slow-sensor presets to explore another case.');
 });
 
 function validation(){
