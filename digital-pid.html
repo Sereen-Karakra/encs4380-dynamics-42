@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Explore digital PID control: sampling, held control signals, anti-windup, live response comparisons and generated Arduino code.">
+<title>Digital PID | Control Lab</title>
+<style>
+
+:root {
+  --navy:#172d4b;
+  --blue:#2563a9;
+  --teal:#087e87;
+  --ink:#263748;
+  --muted:#64748b;
+  --bg:#f2f6fa;
+  --line:#dfe8f0;
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+}
+a { color:inherit; text-decoration:none; }
+.wrap {
+  width:min(1120px,calc(100% - 40px));
+  margin:auto;
+}
+.site-header {
+  background:#fff;
+  border-bottom:1px solid var(--line);
+}
+.navbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  min-height:76px;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-weight:800;
+  color:var(--navy);
+}
+.brand-icon {
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--navy),var(--teal));
+  color:white;
+  font-size:22px;
+}
+.brand small {
+  display:block;
+  margin-top:3px;
+  font-size:11px;
+  letter-spacing:.15em;
+  color:var(--muted);
+}
+.nav-links {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.nav-links a {
+  font-size:14px;
+  font-weight:600;
+  color:#52667b;
+  padding:10px 13px;
+  border-radius:9px;
+}
+.nav-links a:hover { background:#edf4fa; }
+.nav-links .current {
+  background:var(--navy);
+  color:#fff;
+}
+.hero {
+  margin:28px 0 24px;
+  border-radius:22px;
+  padding:40px 44px;
+  background:linear-gradient(118deg,#142b48,#244d70 65%,#0d737b);
+  color:white;
+  box-shadow:0 18px 38px #19334d15;
+}
+.eyebrow {
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:#9eebea;
+}
+.hero h1 {
+  font-size:clamp(35px,4.8vw,54px);
+  letter-spacing:-.045em;
+  line-height:1.1;
+  margin:13px 0;
+}
+.hero p {
+  max-width:730px;
+  color:#dce9f5;
+  line-height:1.7;
+  margin:0;
+}
+.hero-bottom {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:24px;
+}
+.hero-bottom span {
+  font-size:12px;
+  font-weight:700;
+  padding:8px 11px;
+  border:1px solid #ffffff50;
+  border-radius:30px;
+  background:#ffffff12;
+}
+.panel {
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:27px 30px;
+  box-shadow:0 7px 24px #19334d09;
+  margin:18px 0;
+}
+.section-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.kicker {
+  color:var(--teal);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  font-weight:800;
+}
+h2 {
+  color:var(--navy);
+  font-size:clamp(23px,3vw,29px);
+  letter-spacing:-.025em;
+  margin:7px 0 0;
+}
+h3 {
+  color:var(--navy);
+  font-size:18px;
+  margin:12px 0;
+}
+.muted,.small {
+  color:var(--muted);
+  line-height:1.65;
+}
+.small { font-size:13px; }
+.controls {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.field {
+  background:#f8fbfd;
+  border:1px solid var(--line);
+  padding:16px;
+  border-radius:12px;
+}
+.field label {
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  color:var(--navy);
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:13px;
+}
+.field output {
+  color:var(--teal);
+  font-variant-numeric:tabular-nums;
+}
+.field input[type=range] {
+  width:100%;
+  accent-color:var(--teal);
+  cursor:pointer;
+}
+.field select {
+  width:100%;
+  border:1px solid #cddbe7;
+  border-radius:8px;
+  font:inherit;
+  padding:9px;
+  background:#fff;
+  color:var(--navy);
+}
+.subhead {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:24px 0 13px;
+  flex-wrap:wrap;
+}
+.subhead h3 { margin:0; }
+.equation {
+  font:13px/1.65 Consolas,'Courier New',monospace;
+  color:#325675;
+  background:#eef5fa;
+  border-radius:8px;
+  padding:8px 12px;
+  overflow-x:auto;
+}
+.plant-fields {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.info-line {
+  font-size:13px;
+  color:var(--muted);
+  margin:12px 0 0;
+}
+.hidden { display:none!important; }
+.presets {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.preset {
+  border:1px solid #cbdce8;
+  background:#fff;
+  color:var(--navy);
+  padding:9px 13px;
+  border-radius:9px;
+  font:600 13px 'Segoe UI',Arial;
+  cursor:pointer;
+}
+.preset:hover {
+  border-color:var(--teal);
+  background:#f1faf9;
+}
+.preset.active {
+  background:#e6f5f3;
+  border-color:var(--teal);
+  color:#056b71;
+}
+.diagram-box {
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:17px 10px;
+  background:#f8fbff;
+  overflow-x:auto;
+}
+.diagram-box svg {
+  display:block;
+  min-width:760px;
+  max-width:960px;
+  width:100%;
+  margin:auto;
+}
+.feedback-explain {
+  margin:11px 0 0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+.metrics {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+}
+.metric {
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:18px;
+  background:#f8fbfd;
+  border-top:3px solid var(--teal);
+}
+.metric label {
+  display:block;
+  color:var(--muted);
+  font-weight:600;
+  font-size:13px;
+  min-height:32px;
+}
+.metric strong {
+  display:block;
+  margin-top:12px;
+  color:var(--navy);
+  font-size:clamp(20px,2.3vw,27px);
+  font-variant-numeric:tabular-nums;
+}
+.chart-card {
+  border:1px solid var(--line);
+  padding:18px;
+  border-radius:14px;
+  margin-top:16px;
+}
+.chart-card h3 { margin:2px 0 13px; }
+.chart-area {
+  height:320px;
+  position:relative;
+}
+.predict {
+  border-left:4px solid var(--teal);
+  border-radius:10px;
+  background:#f3f9fb;
+  padding:19px 22px;
+}
+.predict p {
+  margin-top:0;
+  line-height:1.6;
+}
+.choices {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.choices label {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:11px 12px;
+  font-size:13px;
+  cursor:pointer;
+}
+.choices input { accent-color:var(--teal); }
+button.check {
+  margin-top:15px;
+  padding:11px 16px;
+  background:var(--navy);
+  border:0;
+  border-radius:9px;
+  color:#fff;
+  font:700 13px 'Segoe UI',Arial;
+  cursor:pointer;
+}
+button.check:hover { background:#284f72; }
+#predictionResult {
+  font-weight:600;
+  color:#176b72;
+  margin:12px 0 0;
+  font-size:14px;
+}
+.table-wrap {
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+th,td {
+  text-align:left;
+  padding:13px 15px;
+  border-bottom:1px solid var(--line);
+}
+th {
+  background:#eef4f9;
+  color:var(--navy);
+}
+tr:last-child td { border-bottom:0; }
+.pass { font-weight:800; color:#168052; }
+.fail { font-weight:800; color:#c33b3b; }
+.site-footer {
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  padding:25px 0 35px;
+  font-size:13px;
+}
+.footer-flex {
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.footer-flex a {
+  color:var(--navy);
+  font-weight:700;
+}
+.footer-flex a:hover { text-decoration:underline; }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline:3px solid #77ccd2;
+  outline-offset:3px;
+}
+@media(max-width:850px) {
+  .navbar {
+    flex-direction:column;
+    align-items:flex-start;
+    padding:16px 0;
+  }
+  .controls {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .metrics {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:600px) {
+  .wrap { width:calc(100% - 24px); }
+  .hero {
+    margin-top:14px;
+    padding:28px 22px;
+    border-radius:16px;
+  }
+  .panel { padding:21px 16px; }
+  .controls,.plant-fields { grid-template-columns:1fr; }
+  .chart-area { height:270px; }
+  .nav-links a {
+    padding:8px 9px;
+    font-size:12px;
+  }
+  .choices { flex-direction:column; }
+  .metric { padding:13px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+}
+
+.field-hint {font-size:12px;color:var(--muted);line-height:1.5;margin:10px 0 0}
+.switch-label input {width:22px;height:22px;accent-color:var(--teal);margin:0}
+.switch-state {color:var(--teal);font-size:18px}
+.compare-controls {display:flex;gap:18px;flex-wrap:wrap;margin-top:24px;font-size:14px}
+.compare-controls label {display:flex;gap:8px;align-items:center}
+.compare-controls input {accent-color:var(--teal);width:17px;height:17px}
+.metric>span {display:block;color:var(--muted);font-size:13px;line-height:1.5;min-height:39px}
+.metric strong {font-size:clamp(17px,2.1vw,24px);overflow-wrap:anywhere}
+.status-pill {font-size:12px;font-weight:700;padding:9px 13px;border-radius:25px;color:#0f6e64;background:#e3f5f0;max-width:100%}
+.status-pill.caution {color:#89511b;background:#fff1de}
+.notice {border:1px solid #e8d5ad;background:#fff9ee;color:#765021;border-radius:10px;padding:13px 16px;font-size:13px;line-height:1.7;margin:16px 0}
+.notice[hidden] {display:none}
+.plot {width:100%;height:auto;display:block;min-height:200px}
+.plot-legend {display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink);margin-bottom:7px}
+.plot-legend span {display:inline-flex;gap:6px;align-items:center}
+.plot-legend i {width:17px;border-top:3px solid;display:inline-block}
+.plot-legend i.dashed {border-top-style:dashed}
+.chart-head {margin-bottom:12px;align-items:center}
+.chart-head h3 {margin:0}
+select {font:inherit;border:1px solid #cddbe7;border-radius:7px;background:#fff;color:var(--navy);padding:8px;max-width:100%}
+caption {text-align:left;padding:14px 15px;color:var(--navy);font-weight:700;background:#f8fbfd}
+td {font-variant-numeric:tabular-nums}
+.explanation {padding-left:23px;line-height:1.9;color:var(--ink);font-size:14px}
+details {border-top:1px solid var(--line);padding:15px 0}
+summary {cursor:pointer;color:var(--navy);font-size:14px;font-weight:700}
+details p {margin-bottom:0}
+pre {background:#14283f;color:#e1eef6;border-radius:13px;padding:23px;font:13px/1.7 Consolas,'Courier New',monospace;overflow:auto;max-height:510px;tab-size:2}
+.predict>select {margin:0 0 15px 8px}
+button:disabled {opacity:.6;cursor:wait}
+@media(max-width:600px) {.chart-card {padding:12px 8px}.plot {min-height:155px}.plot-legend {gap:9px;font-size:11px}.compare-controls {flex-direction:column;gap:13px}.status-pill {line-height:1.6}.field {padding:14px}pre {padding:16px;font-size:12px}}
+
+</style>
+</head>
+<body>
+<header class="site-header">
+  <nav class="navbar wrap" aria-label="Main navigation">
+    <a class="brand" href="index.html"><span class="brand-icon" aria-hidden="true">∿</span><span>Dynamics &amp; Control<small>ENCS4380 · BIRZEIT UNIVERSITY</small></span></a>
+     <div class="nav-links">
+  <a href="index.html">Dynamics Toolkit</a>
+  <a href="control.html">Control Lab</a>
+  <a class="current" href="digital-pid.html" aria-current="page">
+    Digital PID
+  </a>
+  <a href="#results">Live Results</a>
+  <a href="#arduino">Arduino Code</a>
+</div>
+  </nav>
+</header>
+<main class="wrap">
+  <section class="hero" aria-labelledby="title">
+    <div class="eyebrow">Interactive Control Systems / Module 03</div>
+    <h1 id="title">Digital PID</h1>
+    <p>One calculation. One held command. Discover how sampling time and actuator limits shape a digital controller — then explore the Arduino implementation.</p>
+    <div class="hero-bottom"><span>Sample &amp; hold</span><span>Anti-windup</span><span>Live Arduino code</span></div>
+  </section>
+
+  <section class="panel" aria-labelledby="experimentTitle">
+    <div class="section-head"><div><div class="kicker">Experiment &amp; explore</div><h2 id="experimentTitle">Configure the digital loop</h2></div>
+      <div class="presets" aria-label="Guided experiments">
+        <button class="preset" type="button" data-preset="sampling">Sampling experiment</button>
+        <button class="preset" type="button" data-preset="windup">Windup experiment</button>
+        <button class="preset" type="button" data-preset="pid">Try PID</button>
+      </div>
+    </div>
+    <p class="small" id="experimentHelp">Start with the sampling experiment, then increase Ts from 0.020 s to 0.200 s and 0.500 s. Compare the output with the small-Ts reference.</p>
+    <div class="controls">
+      <div class="field"><label for="plant">Plant model</label><select id="plant"><option value="first">First-order system</option><option value="second">Mass–spring–damper system</option></select></div>
+      <div class="field"><label for="Ts">Sampling time Ts <output id="vTs" for="Ts"></output></label><input id="Ts" type="range" min="0.005" max="1" step="0.005" value="0.02"><p class="field-hint" id="samplingRate"></p></div>
+      <div class="field"><label class="switch-label" for="aw">Anti-windup <input id="aw" type="checkbox" role="switch" checked></label><strong class="switch-state" id="awState">ON</strong><p class="field-hint">Conditional integration during saturation.</p></div>
+      <div class="field"><label for="kp">Proportional gain Kp <output id="vkp" for="kp"></output></label><input id="kp" type="range" min="0" max="20" step="0.1" value="9"></div>
+      <div class="field"><label for="ki">Integral gain Ki <output id="vki" for="ki"></output></label><input id="ki" type="range" min="0" max="10" step="0.1" value="0"></div>
+      <div class="field"><label for="kd">Derivative gain Kd <output id="vkd" for="kd"></output></label><input id="kd" type="range" min="0" max="3" step="0.01" value="0"></div>
+      <div class="field"><label for="ref">Step setpoint <output id="vref" for="ref"></output></label><input id="ref" type="range" min="0.5" max="3" step="0.1" value="1"></div>
+      <div class="field"><label for="limit">Control limit ±Umax <output id="vlimit" for="limit"></output></label><input id="limit" type="range" min="0.5" max="20" step="0.05" value="20"></div>
+      <div class="field"><label for="duration">Simulation duration <output id="vduration" for="duration"></output></label><input id="duration" type="range" min="5" max="30" step="1" value="12"></div>
+    </div>
+    <div id="firstControls"><div class="subhead"><h3>First-order model</h3><span class="equation">G(s) = K / (τs + 1)</span></div>
+      <div class="plant-fields">
+        <div class="field"><label for="K">Plant gain K <output id="vK" for="K"></output></label><input id="K" type="range" min="0.5" max="5" step="0.1" value="1"></div>
+        <div class="field"><label for="tau">Time constant τ <output id="vtau" for="tau"></output></label><input id="tau" type="range" min="0.1" max="5" step="0.1" value="1"></div>
+      </div>
+    </div>
+    <div id="secondControls" class="hidden"><div class="subhead"><h3>Mass–spring–damper model</h3><span class="equation">m y'' + b y' + k y = u</span></div>
+      <div class="plant-fields">
+        <div class="field"><label for="m">Mass m <output id="vm" for="m"></output></label><input id="m" type="range" min="0.5" max="5" step="0.1" value="1"></div>
+        <div class="field"><label for="b">Damping b <output id="vb" for="b"></output></label><input id="b" type="range" min="0.2" max="12" step="0.2" value="2"></div>
+        <div class="field"><label for="k">Stiffness k <output id="vk" for="k"></output></label><input id="k" type="range" min="0.5" max="12" step="0.5" value="4"></div>
+      </div>
+    </div>
+    <div class="compare-controls">
+      <label><input id="compareTs" type="checkbox" checked> Compare with a small-Ts reference</label>
+      <label><input id="compareAw" type="checkbox"> Compare anti-windup ON / OFF</label>
+    </div>
+    <p class="small" id="comparisonNote"></p>
+  </section>
+
+  <section class="panel" id="results" aria-labelledby="resultTitle">
+    <div class="section-head"><div><div class="kicker">Live simulation</div><h2 id="resultTitle">Response &amp; performance</h2></div><span class="status-pill" id="responseState" role="status" aria-live="polite"></span></div>
+    <div class="metrics">
+      <div class="metric"><span>Rise time · 10–90% target</span><strong id="rise">—</strong></div>
+      <div class="metric"><span>Overshoot above target</span><strong id="overshoot">—</strong></div>
+      <div class="metric"><span>Settling time · ±2% target</span><strong id="settling">—</strong></div>
+      <div class="metric"><span>Estimated steady-state error</span><strong id="sse">—</strong></div>
+    </div>
+    <p class="small">Metrics describe the selected controller over the visible simulation, relative to the setpoint. Error is a final-window estimate; a varying tail is reported as “Not steady”. Settling requires at least max(1 s, 3Ts) inside the ±2% band.</p>
+    <div class="notice" id="feasibility" role="status" hidden></div>
+    <div class="chart-card"><h3>Output vs. setpoint</h3><div id="outputLegend" class="plot-legend"></div><svg id="outputPlot" class="plot" viewBox="0 0 1000 330" role="img" aria-labelledby="outputPlotTitle"><title id="outputPlotTitle">System output against setpoint over time</title></svg></div>
+    <div class="chart-card"><div class="section-head chart-head"><h3>Sampled control signal &amp; limits</h3><label class="small" for="controlWindow">Show <select id="controlWindow"><option value="2">First 2 seconds</option><option value="5">First 5 seconds</option><option value="full">Full simulation</option></select></label></div><div id="controlLegend" class="plot-legend"></div><svg id="controlPlot" class="plot" viewBox="0 0 1000 330" role="img" aria-labelledby="controlPlotTitle"><title id="controlPlotTitle">Piecewise-constant control commands and actuator limits</title></svg><p class="small">Each horizontal segment is held until the next PID update. The output evolves continuously between updates.</p></div>
+    <p class="small" id="saturationNote"></p>
+    <div class="table-wrap"><table><caption>Compare the same plant and gains</caption><thead><tr><th>Controller</th><th>Ts</th><th>Overshoot</th><th>Settling time</th><th>Estimated error</th><th>Peak |I term|</th></tr></thead><tbody id="comparisonBody"></tbody></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="predictTitle">
+    <div class="section-head"><div><div class="kicker">Predict, then check</div><h2 id="predictTitle">Make a prediction</h2></div></div>
+    <div class="predict">
+      <label class="small" for="question">Experiment</label><select id="question"><option value="sampling">Sampling time</option><option value="windup">Anti-windup</option></select>
+      <p><strong id="questionText"></strong></p>
+      <div class="choices" id="predictionChoices"></div>
+      <button type="button" class="check" id="checkPrediction">Check prediction</button>
+      <p id="predictionResult" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="howTitle">
+    <div class="section-head"><div><div class="kicker">From continuous to digital</div><h2 id="howTitle">What happens at every sample?</h2></div></div>
+    <ol class="explanation"><li>Measure y[k] and calculate e[k] = r − y[k].</li><li>Propose Inew = Iprevious + Ki · Ts · e[k].</li><li>Calculate D = Kd · (e[k] − e[k−1]) / Ts.</li><li>If anti-windup is enabled, reject an integral increment that would push the command farther beyond a limit.</li><li>Apply u[k] = clip(Kp · e[k] + I[k] + D, −Umax, +Umax), then hold it for Ts seconds.</li></ol>
+    <p class="equation">u[k] = Kp·e[k] + Ki·Ts·Σ e[j] + Kd·(e[k] − e[k−1])/Ts &nbsp; (before limiting; anti-windup OFF)</p>
+    <p class="small">Initial state: y = 0, I = 0 and previous error = 0. The step is applied at t = 0 and the first control update occurs immediately. The derivative is taken from error, as in the homework equation, so a setpoint step can cause a derivative kick. The plant uses RK4 substeps with a held control command; changing Ts does not change the plant solver accuracy.</p>
+    <details><summary>Why does a larger Ts matter?</summary><p class="small">A slow update leaves an old command applied for longer. The controller reacts later to changes and can produce overshoot or oscillations. The effect depends on the plant and gains. Try the sampling preset with Ts = 0.020 s, 0.200 s, and 0.500 s; the comparison keeps the plant and gains fixed.</p></details>
+    <details><summary>What does anti-windup change?</summary><p class="small">An actuator cannot exceed its limit, but an unprotected integral can continue accumulating error. Conditional integration prevents further buildup while allowing the integral to unwind. It cannot make an unreachable setpoint reachable. Try the windup preset and compare both curves.</p></details>
+  </section>
+
+  <section class="panel" id="arduino" aria-labelledby="codeTitle">
+    <div class="section-head"><div><div class="kicker">From simulation to implementation</div><h2 id="codeTitle">Arduino PID loop</h2></div><div class="presets"><button type="button" class="preset" id="copyCode">Copy code</button><button type="button" class="preset" id="downloadCode">Download .ino</button></div></div>
+    <p class="small">The sketch uses the selected gains, Ts, setpoint, control limit, and anti-windup setting. The plant is physical, so its model parameters are not used in the controller calculation.</p>
+    <div class="notice">Example hardware adapters use a bipolar analog sensor on A0 and a signed motor command with direction D8 and PWM D9. Calibrate the sensor mapping and adapt these two functions to your encoder and motor driver before using the sketch on your robot.</div>
+    <p class="small">The controller uses fixed Ts in its equations and a non-blocking micros() scheduler. The loop must run fast enough to service each sample; missed deadlines and real hardware jitter change the response.</p>
+    <p class="small" id="codeSettings"></p><pre tabindex="0" aria-label="Generated Arduino sketch"><code id="arduinoCode"></code></pre><p id="copyStatus" role="status" aria-live="polite" class="small"></p>
+  </section>
+</main>
+<footer class="site-footer"><div class="wrap footer-flex"><span>Raneem Alkhawaja · Module P3 · ENCS4380 · Birzeit University</span><span><a href="control.html">← Control Lab</a> &nbsp; · &nbsp; <a href="index.html">Dynamics Toolkit</a></span></div></footer>
+
+<script>
+/* P3 — Digital PID, Raneem Alkhawaja.
+ * The plant uses the same first-order / mass–spring–damper models and
+ * RK4 staging as P1. Unlike P1, PID is evaluated ONLY at sample instants.
+ * RK4 substeps hold u constant; they never update the digital controller.
+ */
+'use strict';
+const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
+
+function pidStep(c, state, measured) {
+  const error = c.ref - measured;
+  // I stores the integral CONTRIBUTION, including Ki. Prior errors are zero.
+  let candidateI = state.integral + c.ki * c.Ts * error;
+  if (c.ki === 0) candidateI = 0;
+  const d = c.kd * (error - state.previousError) / c.Ts;
+  const candidateU = c.kp * error + candidateI + d;
+  // Conditional integration: reject only an increment that pushes farther
+  // into saturation. Opposite-sign error is allowed to unwind the integral.
+  const blocked = c.aw && (
+    (candidateU > c.limit && error > 0) ||
+    (candidateU < -c.limit && error < 0)
+  );
+  if (!blocked) state.integral = candidateI;
+  const raw = c.kp * error + state.integral + d;
+  state.previousError = error;
+  return {u:clamp(raw, -c.limit, c.limit), raw, integral:state.integral, error, blocked};
+}
+
+function plantDerivative(c, x, u) {
+  return c.plant === 'first'
+    ? [(c.K * u - x[0]) / c.tau, 0]
+    : [x[1], (u - c.b * x[1] - c.k * x[0]) / c.m];
+}
+
+function rk4Plant(c, x, u, h) {
+  const add = (a, d, f) => a.map((v, i) => v + f * d[i]);
+  const a = plantDerivative(c, x, u);
+  const b = plantDerivative(c, add(x, a, h / 2), u);
+  const d = plantDerivative(c, add(x, b, h / 2), u);
+  const e = plantDerivative(c, add(x, d, h), u);
+  return x.map((v, i) => v + h * (a[i] + 2*b[i] + 2*d[i] + e[i]) / 6);
+}
+
+function simulateDigital(c) {
+  let x = [0, 0];
+  const pid = {integral:0, previousError:0};
+  const output = [{t:0, y:0}];
+  const samples = [];
+  let saturatedTime = 0;
+  let maxRaw = 0;
+  let peakIntegral = 0;
+  let stopped = false;
+  // Small plant-only integration step. Ts is never used as the solver step.
+  const plantScale = c.plant === 'first' ? c.tau : 1 / Math.sqrt(c.k / c.m);
+  const dampingScale = c.plant === 'first' ? c.tau : c.m / Math.max(c.b, 0.01);
+  const maxStep = Math.min(0.005, plantScale/30, dampingScale/30);
+  for (let n = 0; n*c.Ts < c.duration - 1e-10; n++) {
+    const t = n*c.Ts;
+    const end = Math.min((n+1)*c.Ts, c.duration);
+    const update = pidStep(c, pid, x[0]);
+    samples.push({t, y:x[0], ...update});
+    maxRaw = Math.max(maxRaw, Math.abs(update.raw));
+    peakIntegral = Math.max(peakIntegral, Math.abs(update.integral));
+    if (Math.abs(update.raw) > c.limit + 1e-9) saturatedTime += end-t;
+    const steps = Math.max(1, Math.ceil((end-t)/maxStep));
+    const h = (end-t)/steps;
+    for (let j = 1; j <= steps; j++) {
+      x = rk4Plant(c, x, update.u, h);
+      output.push({t:t+j*h, y:x[0]});
+      if (!x.every(Number.isFinite) || Math.abs(x[0]) > 1e6) {
+        stopped = true;
+        break;
+      }
+    }
+    if (stopped) break;
+  }
+  return {output, samples, saturatedTime, maxRaw, peakIntegral, stopped, duration:c.duration};
+}
+
+function responseMetrics(c, s) {
+  const p = s.output;
+  const lastTime = p[p.length-1].t;
+  const crossing = level => {
+    for (let i = 1; i < p.length; i++) {
+      if (p[i-1].y < level && p[i].y >= level) {
+        return p[i-1].t + (level-p[i-1].y)*(p[i].t-p[i-1].t)/(p[i].y-p[i-1].y);
+      }
+    }
+    return null;
+  };
+  const t10 = crossing(0.1*c.ref);
+  const t90 = crossing(0.9*c.ref);
+  const tailStart = Math.max(0, lastTime-Math.max(1, 3*c.Ts));
+  const tail = p.filter(q => q.t >= tailStart);
+  const tailMean = tail.reduce((sum,q) => sum+q.y,0)/tail.length;
+  const tailRange = Math.max(...tail.map(q=>q.y)) - Math.min(...tail.map(q=>q.y));
+  const tailSteady = !s.stopped && tailRange <= 0.02*c.ref;
+  let lastOutside = -1;
+  for (let i = 0; i < p.length; i++) {
+    if (Math.abs(p[i].y-c.ref) > 0.02*c.ref) lastOutside = i;
+  }
+  const candidateSettling = lastOutside < p.length-1 ? p[Math.max(0,lastOutside+1)].t : null;
+  const settling = candidateSettling !== null && tailSteady &&
+    lastTime-candidateSettling >= Math.max(1,3*c.Ts) ? candidateSettling : null;
+  let peak = 0;
+  for (const q of p) peak = Math.max(peak,q.y);
+  return {
+    rise:t10!==null && t90!==null ? t90-t10 : null,
+    overshoot:Math.max(0,(peak-c.ref)/c.ref)*100,
+    settling,
+    error:tailSteady ? c.ref-tailMean : null,
+    tailMean, tailSteady, peak
+  };
+}
+
+// Expose only the numerical engine for independent checks (no DOM required).
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {pidStep, rk4Plant, simulateDigital, responseMetrics};
+}
+
+'use strict';
+const $ = id => document.getElementById(id);
+const fmt = (v,n=3) => Number.isFinite(v) ? v.toFixed(n) : '—';
+const colors = {selected:'#087e87', reference:'#6675bd', alternate:'#b47725', target:'#bb5860'};
+const ids = ['plant','Ts','aw','kp','ki','kd','ref','limit','duration','K','tau','m','b','k'];
+let latest = [];
+
+function settings() {
+  const c = {};
+  for (const id of ids) c[id] = id==='plant' ? $(id).value : id==='aw' ? $(id).checked : +$(id).value;
+  return c;
+}
+
+function preset(name) {
+  const common = {plant:'first',K:1,tau:1,m:1,b:2,k:4,ref:1,duration:12,kd:0};
+  const values = name==='windup' ? {kp:2,ki:4,Ts:0.05,limit:1.25,aw:true}
+    : name==='pid' ? {kp:3,ki:2,kd:0.1,Ts:0.02,limit:10,aw:true}
+    : {kp:9,ki:0,Ts:0.02,limit:20,aw:true};
+  for (const [id,v] of Object.entries({...common,...values})) {
+    if (id==='aw') $(id).checked=v; else $(id).value=v;
+  }
+  $('compareTs').checked = name!=='windup';
+  $('compareAw').checked = name==='windup';
+  $('experimentHelp').textContent = name==='windup'
+    ? 'Compare anti-windup ON / OFF with the same saturation limit. Watch the overshoot, recovery, and peak integral contribution. Toggle the switch to inspect either case.'
+    : name==='pid'
+    ? 'Explore P, I and D together. Increase Ts and compare against the fast-sampling reference; derivative action on error can produce a kick at the step.'
+    : 'Increase Ts from 0.020 s to 0.200 s and 0.500 s. This P-only example isolates sampling: the small-Ts response is smooth, while a slower controller can oscillate.';
+  $('question').value = name==='windup' ? 'windup' : 'sampling';
+  renderQuestion();
+  update();
+}
+
+// Preserve peaks and troughs when thinning dense output traces for display.
+// The control staircase is not thinned, so no update boundaries disappear.
+function thin(points, max=2200) {
+  if (points.length<=max) return points;
+  const out = [points[0]];
+  const bucket = Math.ceil((points.length-2)/(max/2));
+  for (let start=1; start<points.length-1; start+=bucket) {
+    const end=Math.min(points.length-1,start+bucket);
+    let low=start, high=start;
+    for (let j=start+1;j<end;j++) {
+      if (points[j].y<points[low].y) low=j;
+      if (points[j].y>points[high].y) high=j;
+    }
+    for (const j of [...new Set([low,high])].sort((a,b)=>a-b)) out.push(points[j]);
+  }
+  out.push(points[points.length-1]);
+  return out;
+}
+
+function drawPlot(id, series, xmax, ylabel) {
+  const root = $(id);
+  const ns = 'http://www.w3.org/2000/svg';
+  const node = (name,attrs={},value) => {
+    const el=document.createElementNS(ns,name);
+    for (const [key,v] of Object.entries(attrs)) el.setAttribute(key,v);
+    if (value!==undefined) el.textContent=value;
+    return el;
+  };
+  root.replaceChildren(node('title',{},id==='outputPlot' ? 'Output and setpoint over time' : 'Zero-order-held control commands and limits'));
+  let ymin=0,ymax=0;
+  for (const trace of series) for (const q of trace.points) {
+    if (q.t<=xmax+1e-8 && Number.isFinite(q.y)) {ymin=Math.min(ymin,q.y);ymax=Math.max(ymax,q.y);}
+  }
+  const padding=Math.max(0.1,(ymax-ymin)*0.12);
+  ymin-=padding;ymax+=padding;
+  const box={left:72,right:978,top:16,bottom:279};
+  const x=t=>box.left+t/xmax*(box.right-box.left);
+  const y=v=>box.bottom-(v-ymin)/(ymax-ymin)*(box.bottom-box.top);
+  const tick=v=>Math.abs(v)>=1000 ? v.toExponential(1) : +v.toFixed(2)+'';
+  const textStyle={'font-family':'Segoe UI, Arial, sans-serif','font-size':13,fill:'#64748b'};
+  for (let i=0;i<=5;i++) {
+    const tx=xmax*i/5,ty=ymin+(ymax-ymin)*i/5;
+    root.append(node('line',{x1:x(tx),y1:box.top,x2:x(tx),y2:box.bottom,stroke:'#edf1f5'}));
+    root.append(node('line',{x1:box.left,y1:y(ty),x2:box.right,y2:y(ty),stroke:'#e4ebf2'}));
+    root.append(node('text',{...textStyle,x:x(tx),y:box.bottom+22,'text-anchor':'middle'},tick(tx)));
+    root.append(node('text',{...textStyle,x:box.left-10,y:y(ty)+4,'text-anchor':'end'},tick(ty)));
+  }
+  root.append(node('text',{...textStyle,x:(box.left+box.right)/2,y:326,'text-anchor':'middle'},'Time (s)'));
+  root.append(node('text',{...textStyle,transform:'translate(17 148) rotate(-90)','text-anchor':'middle'},ylabel));
+  const clipId=id+'Clip';
+  const defs=node('defs'),clip=node('clipPath',{id:clipId});
+  clip.append(node('rect',{x:box.left,y:box.top,width:box.right-box.left,height:box.bottom-box.top}));
+  defs.append(clip);root.append(defs);
+  const group=node('g',{'clip-path':`url(#${clipId})`});
+  for (const trace of series) {
+    const visible=trace.points.filter(q=>q.t<=xmax+1e-8);
+    if (!visible.length) continue;
+    const pts=trace.step ? visible : thin(visible);
+    let d=`M${x(pts[0].t).toFixed(2)},${y(pts[0].y).toFixed(2)}`;
+    for (let i=1;i<pts.length;i++) {
+      d+=trace.step ? `H${x(pts[i].t).toFixed(2)}V${y(pts[i].y).toFixed(2)}` : `L${x(pts[i].t).toFixed(2)},${y(pts[i].y).toFixed(2)}`;
+    }
+    if (trace.step) d+=`H${x(xmax).toFixed(2)}`;
+    group.append(node('path',{d,fill:'none',stroke:trace.color,'stroke-width':trace.dash?2:2.6,'stroke-dasharray':trace.dash?'7 5':'none','vector-effect':'non-scaling-stroke','stroke-linejoin':'round'}));
+  }
+  root.append(group);
+  const legend=$(id==='outputPlot'?'outputLegend':'controlLegend');
+  legend.replaceChildren();
+  for (const trace of series) {
+    const span=document.createElement('span'),swatch=document.createElement('i');
+    swatch.style.borderColor=trace.color;if(trace.dash) swatch.className='dashed';
+    span.append(swatch,document.createTextNode(trace.label));legend.append(span);
+  }
+}
+
+function renderResults() {
+  const selected=latest[0],c=selected.c,s=selected.s,m=selected.m;
+  $('rise').textContent=m.rise===null?'Not reached':fmt(m.rise)+' s';
+  $('overshoot').textContent=fmt(m.overshoot,1)+'%';
+  $('settling').textContent=m.settling===null?'Not settled':fmt(m.settling)+' s';
+  $('sse').textContent=m.error===null?'Not steady':fmt(100*m.error/c.ref,2)+'%';
+  const state=s.stopped?'Simulation stopped: excessive response':m.settling!==null?'Within ±2% of target':m.tailSteady?'Steady with target offset':'Not steady in this time window';
+  $('responseState').textContent=state;
+  $('responseState').classList.toggle('caution',m.settling===null);
+  const Kdc=c.plant==='first'?c.K:1/c.k;
+  const unreachable=c.ref>Kdc*c.limit+1e-9;
+  $('feasibility').hidden=!unreachable;
+  $('feasibility').textContent=`The target exceeds this plant's maximum steady output (${fmt(Kdc*c.limit)}). Increase the control limit or reduce the target; anti-windup cannot remove this physical constraint.`;
+  const flat=(value,end=c.duration)=>[{t:0,y:value},{t:end,y:value}];
+  drawPlot('outputPlot',[
+    {label:'Setpoint',color:colors.target,dash:true,points:flat(c.ref)},
+    ...latest.map(r=>({label:r.label,color:r.color,dash:r.dash,points:r.s.output}))
+  ],c.duration,'Output / setpoint');
+  const xmax=$('controlWindow').value==='full'?c.duration:Math.min(c.duration,+$('controlWindow').value);
+  const controlRows=latest.filter(r=>r.kind!=='reference');
+  drawPlot('controlPlot',[
+    ...controlRows.map(r=>({label:r.label+' · u[k]',color:r.color,dash:r.dash,step:true,points:r.s.samples.map(q=>({t:q.t,y:q.u}))})),
+    {label:'+Umax',color:colors.target,dash:true,points:flat(c.limit,xmax)},
+    {label:'−Umax',color:colors.target,dash:true,points:flat(-c.limit,xmax)}
+  ],xmax,'Control command u');
+  $('saturationNote').textContent=`Selected controller: ${s.samples.length} updates · saturated for ${fmt(100*s.saturatedTime/c.duration,1)}% of simulated time · peak requested |u| = ${fmt(s.maxRaw,2)} · peak |I term| = ${fmt(s.peakIntegral,2)}.`;
+  $('comparisonBody').replaceChildren();
+  for (const r of latest) {
+    const tr=document.createElement('tr');
+    const values=[r.label,fmt(r.c.Ts,4)+' s',fmt(r.m.overshoot,1)+'%',r.m.settling===null?'Not settled':fmt(r.m.settling)+' s',r.m.error===null?'Not steady':fmt(100*r.m.error/r.c.ref,2)+'%',fmt(r.s.peakIntegral,3)];
+    for (const v of values) {const td=document.createElement('td');td.textContent=v;tr.append(td);}
+    $('comparisonBody').append(tr);
+  }
+}
+
+function generateArduino(c) {
+  const f=v=>Number(v).toFixed(6)+'f';
+  return `// P3 Digital PID - Raneem Alkhawaja, ENCS4380
+// Generated from the selected settings in digital-pid.html.
+// EXAMPLE adapters: bipolar analog sensor A0, signed H-bridge D8/D9.
+// Calibrate readOutput() and adapt writeControl() to your hardware.
+#include <Arduino.h>
+#include <math.h>
+
+const float KP = ${f(c.kp)};
+const float KI = ${f(c.ki)};
+const float KD = ${f(c.kd)};
+const float TS = ${f(c.Ts)}; // seconds
+const uint32_t SAMPLE_US = ${Math.round(c.Ts*1e6)}UL;
+const float SETPOINT = ${f(c.ref)};
+const float UMAX = ${f(c.limit)};
+const bool ANTI_WINDUP = ${c.aw?'true':'false'};
+
+const uint8_t SENSOR_PIN = A0;
+const uint8_t DIRECTION_PIN = 8;
+const uint8_t PWM_PIN = 9;
+// EXAMPLE sensor calibration: ADC 0 -> -5 units, ADC 1023 -> +5.
+// Replace these values / this adapter with your encoder measurement.
+const float SENSOR_LOW = -5.0f;
+const float SENSOR_HIGH = 5.0f;
+
+float integralTerm = 0.0f;
+float previousError = 0.0f; // zero error before the step
+uint32_t lastSampleUs = 0;
+
+float readOutput() {
+  return SENSOR_LOW + analogRead(SENSOR_PIN) *
+         (SENSOR_HIGH - SENSOR_LOW) / 1023.0f;
+}
+
+void writeControl(float u) {
+  // Signed command: -UMAX..+UMAX maps to direction plus 0..255 PWM.
+  // This adapter assumes a driver with a direction input and PWM enable.
+  int duty = (int)(255.0f * fabsf(u) / UMAX + 0.5f);
+  duty = constrain(duty, 0, 255);
+  analogWrite(PWM_PIN, 0);
+  digitalWrite(DIRECTION_PIN, u >= 0.0f ? HIGH : LOW);
+  analogWrite(PWM_PIN, duty);
+}
+
+void updatePID() {
+  const float measured = readOutput();
+  const float error = SETPOINT - measured;
+  float candidateI = integralTerm + KI * TS * error;
+  if (KI == 0.0f) candidateI = 0.0f;
+  const float d = KD * (error - previousError) / TS;
+  const float candidateU = KP * error + candidateI + d;
+  // Reject an increment that pushes farther into actuator saturation.
+  const bool blocked = ANTI_WINDUP &&
+    ((candidateU > UMAX && error > 0.0f) ||
+     (candidateU < -UMAX && error < 0.0f));
+  if (!blocked) integralTerm = candidateI;
+  const float raw = KP * error + integralTerm + d;
+  const float u = constrain(raw, -UMAX, UMAX);
+  previousError = error;
+  writeControl(u); // Hardware holds this command until the next update.
+}
+
+void setup() {
+  pinMode(SENSOR_PIN, INPUT);
+  pinMode(DIRECTION_PIN, OUTPUT);
+  pinMode(PWM_PIN, OUTPUT);
+  writeControl(0.0f);
+  lastSampleUs = micros();
+  updatePID(); // First update immediately, as in the simulation at t = 0.
+}
+
+void loop() {
+  const uint32_t now = micros();
+  // Unsigned subtraction remains valid across micros() rollover.
+  if ((uint32_t)(now - lastSampleUs) >= SAMPLE_US) {
+    lastSampleUs = now;
+    // Do not replay old samples after a missed deadline.
+    // Keep this loop fast enough to meet TS; fixed-TS PID assumes that.
+    updatePID();
+  }
+  // Other non-blocking work may run here. Avoid delay().
+}
+`;
+}
+
+function update() {
+  const c=settings();
+  for (const id of ids.filter(id=>!['plant','aw'].includes(id))) {
+    $('v'+id).textContent=fmt(c[id],id==='Ts'?3:id==='duration'?0:id==='kd'||id==='limit'?2:1)+(id==='Ts'||id==='duration'?' s':'');
+  }
+  $('awState').textContent=c.aw?'ON':'OFF';
+  $('samplingRate').textContent=`One update every ${fmt(c.Ts*1000,0)} ms · ${fmt(1/c.Ts,1)} Hz`;
+  $('firstControls').classList.toggle('hidden',c.plant!=='first');
+  $('secondControls').classList.toggle('hidden',c.plant!=='second');
+  document.querySelectorAll('[data-preset]').forEach(btn=>btn.classList.remove('active'));
+  const configs=[{c,label:`Selected · AW ${c.aw?'ON':'OFF'}`,color:colors.selected,kind:'selected'}];
+  const smallTs=Math.min(0.005,c.Ts/10);
+  if ($('compareTs').checked) configs.push({c:{...c,Ts:smallTs},label:`Small-Ts reference (${fmt(smallTs,4)} s)`,color:colors.reference,dash:true,kind:'reference'});
+  if ($('compareAw').checked) configs.push({c:{...c,aw:!c.aw},label:`Comparison · AW ${c.aw?'OFF':'ON'}`,color:colors.alternate,dash:true,kind:'alternate'});
+  latest=configs.map(r=>{const s=simulateDigital(r.c);return {...r,s,m:responseMetrics(r.c,s)};});
+  const notes=[];
+  if ($('compareTs').checked) notes.push(`The reference uses Ts = ${fmt(smallTs,4)} s with the same gains, plant, limits and anti-windup setting. It is a sampled reference, not an exact continuous controller.`);
+  if ($('compareAw').checked) notes.push('The anti-windup comparison changes only the ON/OFF setting.');
+  $('comparisonNote').textContent=notes.join(' ');
+  $('arduinoCode').textContent=generateArduino(c);
+  $('codeSettings').textContent=`Kp = ${fmt(c.kp,1)} · Ki = ${fmt(c.ki,1)} · Kd = ${fmt(c.kd,2)} · Ts = ${fmt(c.Ts,3)} s · Target = ${fmt(c.ref,1)} · Limits = ±${fmt(c.limit,2)} · Anti-windup ${c.aw?'ON':'OFF'}`;
+  $('copyStatus').textContent='';
+  renderResults();
+}
+
+const questions={
+  sampling:{text:'With the sampling preset (Kp = 9, Ki = Kd = 0), what can happen when Ts increases from 0.020 s to 0.500 s?',answers:['The response can start oscillating because the command is held too long.','Sampling time has no effect on the response.','A larger Ts always improves accuracy.'],explanation:'A slower controller keeps an old command applied for longer. Try the sampling preset, then increase Ts to 0.500 s and compare the output with the small-Ts reference.'},
+  windup:{text:'When the actuator saturates, what does conditional-integration anti-windup do?',answers:['It prevents integral increments that push farther into saturation.','It raises the actuator limit automatically.','It guarantees zero error even for unreachable targets.'],explanation:'The actuator limit is unchanged. The integral can unwind, but it cannot keep growing in the saturating direction. Try the windup preset and compare overshoot and the peak integral contribution.'}
+};
+function renderQuestion() {
+  const q=questions[$('question').value];
+  $('questionText').textContent=q.text;
+  $('predictionChoices').replaceChildren();
+  // Rotate the correct answer's location between the two questions.
+  const order=$('question').value==='sampling'?[1,0,2]:[2,1,0];
+  for (const i of order) {
+    const label=document.createElement('label'),input=document.createElement('input');
+    input.type='radio';input.name='prediction';input.value=String(i);
+    label.append(input,document.createTextNode(q.answers[i]));$('predictionChoices').append(label);
+  }
+  $('predictionResult').textContent='';
+}
+$('question').addEventListener('change',renderQuestion);
+$('checkPrediction').addEventListener('click',()=>{
+  const answer=document.querySelector('input[name="prediction"]:checked');
+  $('predictionResult').textContent=!answer?'Choose a prediction first.':(answer.value==='0'?'Correct! ':'Not quite. ')+questions[$('question').value].explanation;
+});
+let scheduled=false;
+function scheduleUpdate() {
+  if (scheduled) return;
+  scheduled=true;
+  requestAnimationFrame(()=>{scheduled=false;update();});
+}
+for (const id of [...ids,'compareTs','compareAw']) $(id).addEventListener('input',scheduleUpdate);
+$('controlWindow').addEventListener('change',renderResults);
+document.querySelectorAll('[data-preset]').forEach(btn=>btn.addEventListener('click',()=>{preset(btn.dataset.preset);btn.classList.add('active');}));
+$('copyCode').addEventListener('click',async()=>{
+  const code=$('arduinoCode').textContent;
+  try {
+    if (!navigator.clipboard || !window.isSecureContext) throw new Error('Use fallback');
+    await navigator.clipboard.writeText(code);
+    $('copyStatus').textContent='Arduino code copied.';
+  } catch (_) {
+    const text=document.createElement('textarea');text.value=code;
+    text.style.cssText='position:fixed;left:-9999px;top:0';document.body.append(text);text.select();
+    const copied=document.execCommand('copy');text.remove();$('copyCode').focus();
+    $('copyStatus').textContent=copied?'Arduino code copied.':'Copy unavailable in this browser. Use Download .ino or select the code manually.';
+  }
+});
+$('downloadCode').addEventListener('click',()=>{
+  const url=URL.createObjectURL(new Blob([$('arduinoCode').textContent],{type:'text/plain;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download='digital_pid.ino';document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+renderQuestion();update();
+
+</script>
+</body>
+</html>

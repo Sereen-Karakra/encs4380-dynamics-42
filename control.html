@@ -4,91 +4,430 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="An interactive control systems lab exploring PID tuning, sensor feedback, digital controllers, and a Micromouse motor application.">
-  <title>Control Lab | Dynamics & Control</title>
+  <title>Control Lab | Dynamics &amp; Control</title>
+
   <style>
     :root {
       --navy:#172d4b; --navy-2:#23466c; --blue:#2563a9;
       --teal:#087e87; --ink:#263748; --muted:#64748b;
       --bg:#f2f6fa; --line:#dfe8f0; --white:#fff;
     }
+
     * { box-sizing:border-box; }
     html { scroll-behavior:smooth; }
-    body { margin:0; font-family:'Segoe UI',Tahoma,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+
+    body {
+      margin:0;
+      font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+      color:var(--ink);
+      background:var(--bg);
+    }
+
     a { color:inherit; }
     a:focus-visible { outline:3px solid #64c9d1; outline-offset:4px; }
-    .container { width:min(1120px,calc(100% - 40px)); margin-inline:auto; }
+
+    .container {
+      width:min(1120px,calc(100% - 40px));
+      margin-inline:auto;
+    }
 
     /* Navigation */
     .site-header { background:#fff; border-bottom:1px solid var(--line); }
-    .navbar { display:flex; justify-content:space-between; align-items:center; gap:22px; min-height:76px; }
-    .brand { display:flex; align-items:center; gap:12px; text-decoration:none; font-weight:800; color:var(--navy); white-space:nowrap; }
-    .brand-icon { width:38px; height:38px; border-radius:11px; display:grid; place-items:center; color:#fff; background:linear-gradient(135deg,var(--navy),var(--teal)); font-size:21px; }
-    .brand small { display:block; font-size:11px; letter-spacing:.16em; color:var(--muted); margin-top:3px; }
-    .nav-links { display:flex; align-items:center; flex-wrap:wrap; gap:7px; }
-    .nav-links a { padding:10px 13px; text-decoration:none; border-radius:9px; font-size:14px; font-weight:600; color:#52667b; }
+
+    .navbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:22px;
+      min-height:76px;
+    }
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      text-decoration:none;
+      font-weight:800;
+      color:var(--navy);
+      white-space:nowrap;
+    }
+
+    .brand-icon {
+      width:38px;
+      height:38px;
+      border-radius:11px;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      background:linear-gradient(135deg,var(--navy),var(--teal));
+      font-size:21px;
+    }
+
+    .brand small {
+      display:block;
+      font-size:11px;
+      letter-spacing:.16em;
+      color:var(--muted);
+      margin-top:3px;
+    }
+
+    .nav-links {
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:7px;
+    }
+
+    .nav-links a {
+      padding:10px 13px;
+      text-decoration:none;
+      border-radius:9px;
+      font-size:14px;
+      font-weight:600;
+      color:#52667b;
+    }
+
     .nav-links a:hover { background:#edf4fa; color:var(--navy); }
     .nav-links a.current { color:#fff; background:var(--navy); }
 
     /* Hero */
-    .hero { margin-top:28px; border-radius:23px; background:linear-gradient(119deg,#142b48 0%,#254d70 62%,#0e7079 100%); color:#fff; display:grid; grid-template-columns:1.12fr 1fr; align-items:center; overflow:hidden; min-height:375px; box-shadow:0 20px 40px rgba(25,51,77,.11); }
+    .hero {
+      margin-top:28px;
+      border-radius:23px;
+      background:linear-gradient(119deg,#142b48 0%,#254d70 62%,#0e7079 100%);
+      color:#fff;
+      display:grid;
+      grid-template-columns:1.12fr 1fr;
+      align-items:center;
+      overflow:hidden;
+      min-height:375px;
+      box-shadow:0 20px 40px rgba(25,51,77,.11);
+    }
+
     .hero-copy { padding:clamp(27px,5vw,57px); }
-    .eyebrow { font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+
+    .eyebrow {
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
     .hero .eyebrow { color:#9eebea; }
-    h1 { font-size:clamp(37px,4.7vw,58px); letter-spacing:-.045em; line-height:1.09; margin:19px 0; }
-    .hero p { font-size:16px; line-height:1.75; max-width:480px; color:#dce9f5; margin:0 0 28px; }
-    .hero-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
-    .primary-btn,.outline-btn { display:inline-flex; align-items:center; gap:9px; text-decoration:none; font-weight:700; font-size:14px; padding:13px 17px; border-radius:10px; transition:transform .2s,background .2s; }
+
+    h1 {
+      font-size:clamp(37px,4.7vw,58px);
+      letter-spacing:-.045em;
+      line-height:1.09;
+      margin:19px 0;
+    }
+
+    .hero p {
+      font-size:16px;
+      line-height:1.75;
+      max-width:480px;
+      color:#dce9f5;
+      margin:0 0 28px;
+    }
+
+    .hero-actions {
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:12px;
+    }
+
+    .primary-btn,.outline-btn {
+      display:inline-flex;
+      align-items:center;
+      gap:9px;
+      text-decoration:none;
+      font-weight:700;
+      font-size:14px;
+      padding:13px 17px;
+      border-radius:10px;
+      transition:transform .2s,background .2s;
+    }
+
     .primary-btn { background:#fff; color:var(--navy); }
     .outline-btn { border:1px solid rgba(255,255,255,.38); color:#fff; }
     .primary-btn:hover,.outline-btn:hover { transform:translateY(-2px); }
     .outline-btn:hover { background:rgba(255,255,255,.09); }
+
     .hero-art { padding:24px 29px 24px 0; min-width:0; }
-    .visual-card { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.23); box-shadow:0 15px 35px rgba(0,0,0,.10); border-radius:19px; padding:21px; backdrop-filter:blur(8px); }
-    .visual-top { display:flex; justify-content:space-between; gap:12px; align-items:center; color:#effafa; font-size:12px; font-weight:700; }
-    .visual-pill { border:1px solid rgba(139,238,221,.42); background:rgba(41,169,156,.22); border-radius:20px; padding:6px 9px; color:#c5fff6; }
-    .visual-card svg { display:block; width:100%; height:auto; margin-top:12px; }
-    .visual-foot { display:flex; justify-content:space-between; color:#b9d6e4; font-size:11px; margin-top:6px; }
+
+    .visual-card {
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.23);
+      box-shadow:0 15px 35px rgba(0,0,0,.10);
+      border-radius:19px;
+      padding:21px;
+      backdrop-filter:blur(8px);
+    }
+
+    .visual-top {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      color:#effafa;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .visual-pill {
+      border:1px solid rgba(139,238,221,.42);
+      background:rgba(41,169,156,.22);
+      border-radius:20px;
+      padding:6px 9px;
+      color:#c5fff6;
+    }
+
+    .visual-card svg {
+      display:block;
+      width:100%;
+      height:auto;
+      margin-top:12px;
+    }
+
+    .visual-foot {
+      display:flex;
+      justify-content:space-between;
+      color:#b9d6e4;
+      font-size:11px;
+      margin-top:6px;
+    }
 
     /* Shared sections and cards */
     main { padding-bottom:40px; }
     .section { margin-top:50px; scroll-margin-top:28px; }
-    .section-heading { display:flex; align-items:end; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:21px; }
+
+    .section-heading {
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      gap:14px;
+      margin-bottom:21px;
+    }
+
     .section-heading .eyebrow { color:var(--teal); }
-    h2 { color:var(--navy); font-size:clamp(25px,3vw,33px); line-height:1.2; letter-spacing:-.028em; margin:8px 0 0; }
-    .section-note { color:var(--muted); font-size:14px; margin:0; max-width:430px; line-height:1.65; }
-    .module-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
-    .module-card { background:var(--white); border:1px solid var(--line); border-radius:18px; padding:26px; display:flex; flex-direction:column; min-height:238px; box-shadow:0 7px 24px rgba(25,51,77,.035); transition:transform .2s,box-shadow .2s; }
-    .module-card:hover { transform:translateY(-3px); box-shadow:0 14px 32px rgba(25,51,77,.085); }
-    .module-head { display:flex; justify-content:space-between; gap:14px; align-items:center; margin-bottom:20px; }
-    .module-num { font-size:12px; letter-spacing:.12em; font-weight:800; color:var(--muted); }
-    .module-symbol { width:47px; height:47px; border-radius:14px; background:#eaf3fb; color:var(--blue); display:grid; place-items:center; font-size:24px; font-weight:700; }
-    .module-card:nth-child(2) .module-symbol { background:#eef2ff; color:#5968bd; }
-    .module-card:nth-child(3) .module-symbol { background:#fff3e7; color:#a96828; }
-    .module-card:nth-child(4) .module-symbol { background:#e5f6f3; color:#087e87; }
-    h3 { color:var(--navy); font-size:21px; margin:0 0 11px; letter-spacing:-.02em; }
-    .module-card p { color:var(--muted); line-height:1.7; margin:0 0 21px; font-size:14px; }
-    .module-action { margin-top:auto; min-height:28px; display:flex; align-items:center; }
-    .module-action a { color:var(--blue); font-size:14px; font-weight:800; text-decoration:none; }
+
+    h2 {
+      color:var(--navy);
+      font-size:clamp(25px,3vw,33px);
+      line-height:1.2;
+      letter-spacing:-.028em;
+      margin:8px 0 0;
+    }
+
+    .section-note {
+      color:var(--muted);
+      font-size:14px;
+      margin:0;
+      max-width:430px;
+      line-height:1.65;
+    }
+
+    .module-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+
+    .module-card {
+      background:var(--white);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:26px;
+      display:flex;
+      flex-direction:column;
+      min-height:238px;
+      box-shadow:0 7px 24px rgba(25,51,77,.035);
+      transition:transform .2s,box-shadow .2s;
+    }
+
+    .module-card:hover {
+      transform:translateY(-3px);
+      box-shadow:0 14px 32px rgba(25,51,77,.085);
+    }
+
+    .module-head {
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:center;
+      margin-bottom:20px;
+    }
+
+    .module-num {
+      font-size:12px;
+      letter-spacing:.12em;
+      font-weight:800;
+      color:var(--muted);
+    }
+
+    .module-symbol {
+      width:47px;
+      height:47px;
+      border-radius:14px;
+      background:#eaf3fb;
+      color:var(--blue);
+      display:grid;
+      place-items:center;
+      font-size:24px;
+      font-weight:700;
+    }
+
+    .module-card:nth-child(2) .module-symbol {
+      background:#eef2ff;
+      color:#5968bd;
+    }
+
+    .module-card:nth-child(3) .module-symbol {
+      background:#fff3e7;
+      color:#a96828;
+    }
+
+    .module-card:nth-child(4) .module-symbol {
+      background:#e5f6f3;
+      color:#087e87;
+    }
+
+    h3 {
+      color:var(--navy);
+      font-size:21px;
+      margin:0 0 11px;
+      letter-spacing:-.02em;
+    }
+
+    .module-card p {
+      color:var(--muted);
+      line-height:1.7;
+      margin:0 0 21px;
+      font-size:14px;
+    }
+
+    .module-action {
+      margin-top:auto;
+      min-height:28px;
+      display:flex;
+      align-items:center;
+    }
+
+    .module-action a {
+      color:var(--blue);
+      font-size:14px;
+      font-weight:800;
+      text-decoration:none;
+    }
+
     .module-action a:hover { text-decoration:underline; }
-    .module-action span { color:#8998a8; font-size:13px; font-weight:600; }
+
+    .module-action span {
+      color:#8998a8;
+      font-size:13px;
+      font-weight:600;
+    }
 
     /* Project and advanced sections */
-    .project-card { border-radius:20px; border:1px solid #d6e8ea; background:linear-gradient(120deg,#fff,#f1fbfa); padding:30px; display:grid; grid-template-columns:1.4fr .8fr; gap:25px; align-items:center; }
-    .project-card p,.advanced-card p { color:var(--muted); line-height:1.72; font-size:14px; margin:0 0 20px; }
+    .project-card {
+      border-radius:20px;
+      border:1px solid #d6e8ea;
+      background:linear-gradient(120deg,#fff,#f1fbfa);
+      padding:30px;
+      display:grid;
+      grid-template-columns:1.4fr .8fr;
+      gap:25px;
+      align-items:center;
+    }
+
+    .project-card p,.advanced-card p {
+      color:var(--muted);
+      line-height:1.72;
+      font-size:14px;
+      margin:0 0 20px;
+    }
+
     .tags { display:flex; flex-wrap:wrap; gap:8px; }
-    .tags span { background:#e1f3f1; color:#116e70; border-radius:20px; padding:8px 11px; font-size:12px; font-weight:700; }
-    .project-visual { border-radius:14px; padding:25px 18px; border:1px solid #cee2e2; background:#fff; text-align:center; }
-    .project-visual .flow { display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; color:var(--navy); font-size:13px; }
-    .flow span { padding:12px 14px; background:#ecf5fb; border:1px solid #cfe1f0; border-radius:8px; }
+
+    .tags span {
+      background:#e1f3f1;
+      color:#116e70;
+      border-radius:20px;
+      padding:8px 11px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .project-visual {
+      border-radius:14px;
+      padding:25px 18px;
+      border:1px solid #cee2e2;
+      background:#fff;
+      text-align:center;
+    }
+
+    .project-visual .flow {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      font-weight:800;
+      color:var(--navy);
+      font-size:13px;
+    }
+
+    .flow span {
+      padding:12px 14px;
+      background:#ecf5fb;
+      border:1px solid #cfe1f0;
+      border-radius:8px;
+    }
+
     .flow i { font-style:normal; color:var(--teal); font-size:20px; }
-    .project-visual small { display:block; margin-top:15px; font-size:12px; color:var(--muted); }
-    .advanced-card { border:1px solid var(--line); background:#fff; border-radius:18px; padding:27px 30px; display:flex; justify-content:space-between; align-items:center; gap:25px; }
+
+    .project-visual small {
+      display:block;
+      margin-top:15px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .advanced-card {
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:27px 30px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:25px;
+    }
+
     .advanced-card h3 { margin-bottom:8px; }
     .advanced-card p { margin-bottom:12px; }
     .advanced-card .tags span { background:#f0f5fa; color:#526b81; }
-    footer { padding:27px 0 35px; border-top:1px solid var(--line); font-size:13px; color:#718397; }
-    footer .container { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; }
-    footer a { color:var(--navy-2); text-decoration:none; font-weight:700; }
+
+    footer {
+      padding:27px 0 35px;
+      border-top:1px solid var(--line);
+      font-size:13px;
+      color:#718397;
+    }
+
+    footer .container {
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    footer a {
+      color:var(--navy-2);
+      text-decoration:none;
+      font-weight:700;
+    }
 
     @media(max-width:850px) {
       .hero { grid-template-columns:1fr; }
@@ -97,6 +436,7 @@
       .navbar { align-items:flex-start; padding:17px 0; flex-direction:column; gap:14px; }
       .project-card { grid-template-columns:1fr; }
     }
+
     @media(max-width:620px) {
       .container { width:calc(100% - 24px); }
       .hero { margin-top:14px; border-radius:17px; }
@@ -110,16 +450,25 @@
       .section { margin-top:37px; }
       .nav-links a { font-size:12px; padding:8px 9px; }
     }
-    @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } * { transition:none!important; } }
+
+    @media(prefers-reduced-motion:reduce) {
+      html { scroll-behavior:auto; }
+      * { transition:none!important; }
+    }
   </style>
 </head>
+
 <body>
   <header class="site-header">
     <nav class="navbar container" aria-label="Main navigation">
       <a class="brand" href="index.html" aria-label="Dynamics and Control home">
         <span class="brand-icon">∿</span>
-        <span>Dynamics &amp; Control<small>ENCS4380 · BIRZEIT UNIVERSITY</small></span>
+        <span>
+          Dynamics &amp; Control
+          <small>ENCS4380 · BIRZEIT UNIVERSITY</small>
+        </span>
       </a>
+
       <div class="nav-links">
         <a href="index.html">Dynamics Toolkit</a>
         <a href="control.html" class="current" aria-current="page">Control Lab</a>
@@ -134,119 +483,304 @@
     <section class="hero" aria-labelledby="main-title">
       <div class="hero-copy">
         <div class="eyebrow">Interactive Control Systems</div>
-        <h1 id="main-title">Understand feedback.<br>Shape the response.</h1>
-        <p>Explore PID control through hands-on simulations. Adjust a controller, watch the system respond, and discover how feedback affects stability and accuracy.</p>
+
+        <h1 id="main-title">
+          Understand feedback.<br>
+          Shape the response.
+        </h1>
+
+        <p>
+          Explore PID control through hands-on simulations. Adjust a controller,
+          watch the system respond, and discover how feedback affects stability
+          and accuracy.
+        </p>
+
         <div class="hero-actions">
-          <a class="primary-btn" href="#modules">Explore modules <span aria-hidden="true">↗</span></a>
-          <a class="outline-btn" href="index.html">Back to Dynamics <span aria-hidden="true">→</span></a>
+          <a class="primary-btn" href="#modules">
+            Explore modules <span aria-hidden="true">↗</span>
+          </a>
+
+          <a class="outline-btn" href="index.html">
+            Back to Dynamics <span aria-hidden="true">→</span>
+          </a>
         </div>
       </div>
+
       <div class="hero-art">
         <div class="visual-card">
-          <div class="visual-top"><span>Feedback response</span><span class="visual-pill">PID + Plant</span></div>
-          <svg viewBox="0 0 410 214" role="img" aria-label="Illustration of a system output approaching a setpoint">
+          <div class="visual-top">
+            <span>Feedback response</span>
+            <span class="visual-pill">PID + Plant</span>
+          </div>
+
+          <svg
+            viewBox="0 0 410 214"
+            role="img"
+            aria-label="Illustration of a system output approaching a setpoint"
+          >
             <g stroke="rgba(255,255,255,.12)" stroke-width="1">
               <path d="M18 35 H397 M18 75 H397 M18 115 H397 M18 155 H397 M18 195 H397"/>
               <path d="M18 15 V195 M93 15 V195 M169 15 V195 M245 15 V195 M321 15 V195 M397 15 V195"/>
             </g>
-            <path d="M18 74 H397" stroke="#ffb7a4" stroke-width="2.5" stroke-dasharray="7 6" fill="none" />
-            <path d="M18 191 C40 191 52 142 69 97 C86 48 104 45 124 58 C145 75 163 93 185 80 C204 70 218 67 239 74 C259 80 283 76 308 74 C345 73 366 74 397 74" stroke="#84e6df" stroke-width="4" stroke-linecap="round" fill="none" />
-            <circle cx="397" cy="74" r="4.5" fill="#84e6df" />
-            <g font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#eff9fe">
-              <circle cx="33" cy="14" r="4" fill="#ffb7a4"/><text x="44" y="18">Setpoint</text>
-              <circle cx="146" cy="14" r="4" fill="#84e6df"/><text x="157" y="18">Output</text>
+
+            <path
+              d="M18 74 H397"
+              stroke="#ffb7a4"
+              stroke-width="2.5"
+              stroke-dasharray="7 6"
+              fill="none"
+            />
+
+            <path
+              d="M18 191 C40 191 52 142 69 97 C86 48 104 45 124 58 C145 75 163 93 185 80 C204 70 218 67 239 74 C259 80 283 76 308 74 C345 73 366 74 397 74"
+              stroke="#84e6df"
+              stroke-width="4"
+              stroke-linecap="round"
+              fill="none"
+            />
+
+            <circle cx="397" cy="74" r="4.5" fill="#84e6df"/>
+
+            <g
+              font-family="Segoe UI, Arial, sans-serif"
+              font-size="12"
+              fill="#eff9fe"
+            >
+              <circle cx="33" cy="14" r="4" fill="#ffb7a4"/>
+              <text x="44" y="18">Setpoint</text>
+
+              <circle cx="146" cy="14" r="4" fill="#84e6df"/>
+              <text x="157" y="18">Output</text>
             </g>
           </svg>
-          <div class="visual-foot"><span>Illustrative step response</span><span>Time →</span></div>
+
+          <div class="visual-foot">
+            <span>Illustrative step response</span>
+            <span>Time →</span>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="section" id="modules">
       <div class="section-heading">
-        <div><div class="eyebrow">THE INTERACTIVE LAB</div><h2>Explore control concepts</h2></div>
-        <p class="section-note">Four focused experiences, from PID fundamentals to digital implementation and controller tuning.</p>
+        <div>
+          <div class="eyebrow">THE INTERACTIVE LAB</div>
+          <h2>Explore control concepts</h2>
+        </div>
+
+        <p class="section-note">
+          Four focused experiences, from PID fundamentals to digital
+          implementation and controller tuning.
+        </p>
       </div>
+
       <div class="module-grid">
+
+        <!-- Module 1 -->
         <article class="module-card" data-file="pid-playground.html">
-          <div class="module-head"><span class="module-num">MODULE 01 / PID</span><span class="module-symbol" aria-hidden="true">∿</span></div>
+          <div class="module-head">
+            <span class="module-num">MODULE 01 / PID</span>
+            <span class="module-symbol" aria-hidden="true">∿</span>
+          </div>
+
           <h3>PID Playground</h3>
-          <p>Experiment with proportional, integral, and derivative gains. Compare plant responses, control limits, and key performance metrics.</p>
-          <div class="module-action" data-action><span>In preparation</span></div>
+
+          <p>
+            Experiment with proportional, integral, and derivative gains.
+            Compare plant responses, control limits, and key performance metrics.
+          </p>
+
+          <div class="module-action" data-action>
+            <a href="pid-playground.html">Explore module →</a>
+          </div>
         </article>
+
+        <!-- Module 2 -->
         <article class="module-card" data-file="slow-sensor.html">
-          <div class="module-head"><span class="module-num">MODULE 02 / FEEDBACK</span><span class="module-symbol" aria-hidden="true">◉</span></div>
+          <div class="module-head">
+            <span class="module-num">MODULE 02 / FEEDBACK</span>
+            <span class="module-symbol" aria-hidden="true">◉</span>
+          </div>
+
           <h3>Sensor Delay</h3>
-          <p>Compare the real system output with delayed sensor measurements. See how lag influences overshoot, oscillation, and stability.</p>
-          <div class="module-action" data-action><span>In preparation</span></div>
+
+          <p>
+            Compare the real system output with delayed sensor measurements.
+            See how lag influences overshoot, oscillation, and stability.
+          </p>
+
+          <div class="module-action" data-action>
+            <a href="slow-sensor.html">Explore module →</a>
+          </div>
         </article>
+
+        <!-- Module 3 -->
         <article class="module-card" data-file="digital-pid.html">
-          <div class="module-head"><span class="module-num">MODULE 03 / DIGITAL CONTROL</span><span class="module-symbol" aria-hidden="true">▤</span></div>
+          <div class="module-head">
+            <span class="module-num">MODULE 03 / DIGITAL CONTROL</span>
+            <span class="module-symbol" aria-hidden="true">▤</span>
+          </div>
+
           <h3>Digital PID</h3>
-          <p>Explore sampling time, discrete control signals, and anti-windup behavior. Generate controller code for an Arduino.</p>
-          <div class="module-action" data-action><span>In preparation</span></div>
+
+          <p>
+            Explore sampling time, discrete control signals, and anti-windup
+            behavior. Generate controller code for an Arduino.
+          </p>
+
+          <div class="module-action" data-action>
+            <a href="digital-pid.html">Explore module →</a>
+          </div>
         </article>
+
+        <!-- Module 4 -->
         <article class="module-card" data-file="tuning-challenge.html">
-          <div class="module-head"><span class="module-num">MODULE 04 / CHALLENGE</span><span class="module-symbol" aria-hidden="true">◎</span></div>
+          <div class="module-head">
+            <span class="module-num">MODULE 04 / CHALLENGE</span>
+            <span class="module-symbol" aria-hidden="true">◎</span>
+          </div>
+
           <h3>Tuning Challenge</h3>
-          <p>Find the right gains for an unknown plant. Balance response speed, overshoot, settling time, and steady-state accuracy.</p>
-          <div class="module-action" data-action><span>In preparation</span></div>
+
+          <p>
+            Find the right gains for an unknown plant. Balance response speed,
+            overshoot, settling time, and steady-state accuracy.
+          </p>
+
+          <div class="module-action" data-action>
+            <span>In preparation</span>
+          </div>
         </article>
+
       </div>
     </section>
 
     <section class="section" id="project">
-      <div class="section-heading"><div><div class="eyebrow">REAL-WORLD APPLICATION</div><h2>Control meets Micromouse</h2></div></div>
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">REAL-WORLD APPLICATION</div>
+          <h2>Control meets Micromouse</h2>
+        </div>
+      </div>
+
       <article class="project-card" data-file="my-system.html">
         <div>
           <h3>Drive Motor Speed Control</h3>
-          <p>Apply PID control to the Micromouse drive motor. Model the motor dynamics, define speed-control targets, and study the response before running the controller on hardware.</p>
-          <div class="tags"><span>Motor model</span><span>Speed feedback</span><span>PID tuning</span></div>
-          <div class="module-action" data-action style="margin-top:22px"><span>In preparation</span></div>
+
+          <p>
+            Apply PID control to the Micromouse drive motor. Model the motor
+            dynamics, define speed-control targets, and study the response
+            before running the controller on hardware.
+          </p>
+
+          <div class="tags">
+            <span>Motor model</span>
+            <span>Speed feedback</span>
+            <span>PID tuning</span>
+          </div>
+
+          <div class="module-action" data-action style="margin-top:22px">
+            <span>In preparation</span>
+          </div>
         </div>
+
         <div class="project-visual" aria-label="Simplified motor control flow">
-          <div class="flow"><span>Target speed</span><i>→</i><span>PID</span><i>→</i><span>Motor</span></div>
+          <div class="flow">
+            <span>Target speed</span>
+            <i>→</i>
+            <span>PID</span>
+            <i>→</i>
+            <span>Motor</span>
+          </div>
+
           <small>Encoder feedback closes the loop</small>
         </div>
       </article>
     </section>
 
     <section class="section" id="explore">
-      <div class="section-heading"><div><div class="eyebrow">BEYOND THE BASICS</div><h2>Advanced experiments</h2></div></div>
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">BEYOND THE BASICS</div>
+          <h2>Advanced experiments</h2>
+        </div>
+      </div>
+
       <article class="advanced-card" data-file="control-bonus.html">
         <div>
           <h3>Go further with control</h3>
-          <p>Explore an additional control technique, from real-hardware testing to classical tuning methods or state-space design.</p>
-          <div class="tags"><span>Hardware testing</span><span>Ziegler–Nichols</span><span>State-space control</span></div>
+
+          <p>
+            Explore an additional control technique, from real-hardware
+            testing to classical tuning methods or state-space design.
+          </p>
+
+          <div class="tags">
+            <span>Hardware testing</span>
+            <span>Ziegler–Nichols</span>
+            <span>State-space control</span>
+          </div>
         </div>
-        <div class="module-action" data-action><span>In preparation</span></div>
+
+        <div class="module-action" data-action>
+          <span>In preparation</span>
+        </div>
       </article>
     </section>
   </main>
 
-  <footer><div class="container"><span>ENCS4380 · Interfacing Techniques · Birzeit University</span><a href="index.html">Explore Dynamic Characteristics →</a></div></footer>
+  <footer>
+    <div class="container">
+      <span>
+        ENCS4380 · Interfacing Techniques · Birzeit University
+      </span>
+
+      <a href="index.html">
+        Explore Dynamic Characteristics →
+      </a>
+    </div>
+  </footer>
 
   <script>
-    // Activate links as teammates add their HTML pages to the same folder.
+    // Ready modules have direct links that also work from local files.
+    // Discover future modules when served over HTTP(S).
     async function activateModule(card) {
-      const file = card.dataset.file;
       const action = card.querySelector('[data-action]');
-      let exists = file === 'pid-playground.html' && location.protocol === 'file:';
-      if (location.protocol !== 'file:') {
-        try {
-          const response = await fetch(file, { method:'HEAD', cache:'no-store' });
-          exists = response.ok && (response.headers.get('content-type') || '').includes('text/html');
-        } catch (_) { exists = false; }
-      }
-      if (exists) {
+
+      if (!action || action.querySelector('a[href]')) return;
+      if (location.protocol === 'file:') return;
+
+      const file = card.dataset.file;
+
+      try {
+        const response = await fetch(file, {
+          method: 'HEAD',
+          cache: 'no-store'
+        });
+
+        const contentType = response.headers.get('content-type') || '';
+
+        if (!response.ok || !contentType.includes('text/html')) return;
+
         const link = document.createElement('a');
         link.href = file;
-        link.textContent = 'Explore module  →';
-        if (file === 'my-system.html') link.textContent = 'Explore motor control  →';
-        if (file === 'control-bonus.html') link.textContent = 'Explore advanced lab  →';
+        link.textContent = 'Explore module →';
+
+        if (file === 'my-system.html') {
+          link.textContent = 'Explore motor control →';
+        }
+
+        if (file === 'control-bonus.html') {
+          link.textContent = 'Explore advanced lab →';
+        }
+
         action.replaceChildren(link);
+      } catch (_) {
+        // Keep unavailable modules marked as in preparation.
       }
     }
+
     document.querySelectorAll('[data-file]').forEach(activateModule);
   </script>
 </body>

@@ -130,11 +130,13 @@ body { padding:0; background:var(--bg); }
       <span>Dynamics &amp; Control<small>ENCS4380 · BIRZEIT UNIVERSITY</small></span>
     </a>
     <div class="nav-links">
-      <a href="index.html">Dynamics Toolkit</a>
-      <a href="control.html">Control Lab</a>
-      <a href="pid-playground.html">PID Playground</a>
-      <a href="slow-sensor.html" class="current" aria-current="page">Sensor Delay</a>
-    </div>
+  <a href="index.html">Dynamics Toolkit</a>
+  <a href="control.html">Control Lab</a>
+  <a href="slow-sensor.html" class="current" aria-current="page">
+    Sensor Delay
+  </a>
+  <a href="#results">Live Results</a>
+</div>
   </nav>
 </header>
 <main class="page-shell">
@@ -150,7 +152,7 @@ body { padding:0; background:var(--bg); }
   </div>
 </section>
 
-<section class="card">
+<section class="card" id="results">
   <div class="section-title"><div><div class="kicker">Experiment & explore</div><h2>Configure sensor & controller</h2></div></div>
   <div class="controls">
     <div><label for="tauS">Sensor time constant τs (s): <span id="vtauS"></span></label>
@@ -304,7 +306,7 @@ body { padding:0; background:var(--bg); }
 <footer class="site-footer">
   <div class="footer-flex">
     <span>Dynamics &amp; Control · ENCS4380 · Birzeit University · Module by Sereen Karakra</span>
-    <span><a href="control.html">← Control Lab</a> &nbsp; · &nbsp; <a href="pid-playground.html">PID Playground</a> &nbsp; · &nbsp; <a href="index.html">Dynamics Toolkit</a></span>
+    <span><a href="control.html">← Control Lab</a> &nbsp; · &nbsp; <a href="index.html">Dynamics Toolkit</a></span>
   </div>
 </footer>
 
