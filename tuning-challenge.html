@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Tune a PID controller to meet performance specifications on a hidden random plant.">
+<title>Tuning Challenge | Control Lab</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --navy:#172d4b;
+  --blue:#2563a9;
+  --teal:#087e87;
+  --ink:#263748;
+  --muted:#64748b;
+  --bg:#f2f6fa;
+  --line:#dfe8f0;
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+}
+a { color:inherit; text-decoration:none; }
+.wrap {
+  width:min(1120px,calc(100% - 40px));
+  margin:auto;
+}
+.site-header {
+  background:#fff;
+  border-bottom:1px solid var(--line);
+}
+.navbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  min-height:76px;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-weight:800;
+  color:var(--navy);
+}
+.brand-icon {
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--navy),var(--teal));
+  color:white;
+  font-size:22px;
+}
+.brand small {
+  display:block;
+  margin-top:3px;
+  font-size:11px;
+  letter-spacing:.15em;
+  color:var(--muted);
+}
+.nav-links {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.nav-links a {
+  font-size:14px;
+  font-weight:600;
+  color:#52667b;
+  padding:10px 13px;
+  border-radius:9px;
+}
+.nav-links a:hover { background:#edf4fa; }
+.nav-links .current {
+  background:var(--navy);
+  color:#fff;
+}
+.hero {
+  margin:28px 0 24px;
+  border-radius:22px;
+  padding:40px 44px;
+  background:linear-gradient(118deg,#142b48,#244d70 65%,#0d737b);
+  color:white;
+  box-shadow:0 18px 38px #19334d15;
+}
+.eyebrow {
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:#9eebea;
+}
+.hero h1 {
+  font-size:clamp(35px,4.8vw,54px);
+  letter-spacing:-.045em;
+  line-height:1.1;
+  margin:13px 0;
+}
+.hero p {
+  max-width:750px;
+  color:#dce9f5;
+  line-height:1.7;
+  margin:0;
+}
+.hero-bottom {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:24px;
+}
+.hero-bottom span {
+  font-size:12px;
+  font-weight:700;
+  padding:8px 11px;
+  border:1px solid #ffffff50;
+  border-radius:30px;
+  background:#ffffff12;
+}
+.panel {
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:27px 30px;
+  box-shadow:0 7px 24px #19334d09;
+  margin:18px 0;
+}
+.section-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.kicker {
+  color:var(--teal);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  font-weight:800;
+}
+h2 {
+  color:var(--navy);
+  font-size:clamp(23px,3vw,29px);
+  letter-spacing:-.025em;
+  margin:7px 0 0;
+}
+h3 {
+  color:var(--navy);
+  font-size:18px;
+  margin:12px 0;
+}
+.small { color:var(--muted); line-height:1.65; font-size:13px; }
+.score-pill {
+  background:#e6f5f3;
+  border:1px solid #b5e0dc;
+  color:#056b71;
+  font-weight:800;
+  padding:10px 15px;
+  border-radius:12px;
+  font-size:14px;
+}
+.spec-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
+.spec-card {
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:16px;
+  background:#f8fbfd;
+  border-top:3px solid var(--blue);
+}
+.spec-card.ok { border-top-color:#168052; background:#f2fbf6; }
+.spec-card.bad { border-top-color:#c33b3b; background:#fdf5f5; }
+.spec-title { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.spec-target { font-size:19px; font-weight:800; color:var(--navy); margin:8px 0; }
+.spec-actual { font-size:13px; color:var(--ink); display:flex; justify-content:space-between; align-items:center; }
+.badge {
+  display:inline-block;
+  padding:3px 9px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:800;
+}
+.badge.pass { background:#dcfce7; color:#168052; }
+.badge.fail { background:#fee2e2; color:#c33b3b; }
+.controls {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.field {
+  background:#f8fbfd;
+  border:1px solid var(--line);
+  padding:16px;
+  border-radius:12px;
+}
+.field label {
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  color:var(--navy);
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:13px;
+}
+.field output {
+  color:var(--teal);
+  font-variant-numeric:tabular-nums;
+}
+.field input[type=range] {
+  width:100%;
+  accent-color:var(--teal);
+  cursor:pointer;
+}
+.btn-row {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+button.btn {
+  padding:11px 16px;
+  background:var(--navy);
+  border:0;
+  border-radius:9px;
+  color:#fff;
+  font:700 13px 'Segoe UI',Arial;
+  cursor:pointer;
+}
+button.btn:hover { background:#284f72; }
+button.btn.teal { background:var(--teal); }
+button.btn.teal:hover { background:#06676e; }
+button.btn.outline {
+  background:#fff;
+  color:var(--navy);
+  border:1px solid #cbdce8;
+}
+button.btn.outline:hover { background:#f1faf9; border-color:var(--teal); }
+.reveal-box {
+  margin-top:16px;
+  padding:14px 16px;
+  border-radius:11px;
+  background:#f0f7fb;
+  border:1px solid #cde0ee;
+  font-size:13px;
+  line-height:1.65;
+  display:none;
+}
+.reveal-box.show { display:block; }
+.metrics {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:16px;
+}
+.metric {
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:16px;
+  background:#f8fbfd;
+  border-top:3px solid var(--teal);
+}
+.metric label {
+  display:block;
+  color:var(--muted);
+  font-weight:600;
+  font-size:13px;
+}
+.metric strong {
+  display:block;
+  margin-top:10px;
+  color:var(--navy);
+  font-size:22px;
+  font-variant-numeric:tabular-nums;
+}
+.chart-card {
+  border:1px solid var(--line);
+  padding:18px;
+  border-radius:14px;
+  margin-top:14px;
+}
+.chart-area { height:310px; position:relative; }
+.predict {
+  border-left:4px solid var(--teal);
+  border-radius:10px;
+  background:#f3f9fb;
+  padding:19px 22px;
+}
+.predict p { margin-top:0; line-height:1.6; }
+.choices { display:flex; flex-wrap:wrap; gap:10px; }
+.choices label {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:11px 12px;
+  font-size:13px;
+  cursor:pointer;
+}
+.choices input { accent-color:var(--teal); }
+#predictionResult {
+  font-weight:600;
+  color:#176b72;
+  margin:12px 0 0;
+  font-size:14px;
+}
+.table-wrap {
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th,td { text-align:left; padding:13px 15px; border-bottom:1px solid var(--line); }
+th { background:#eef4f9; color:var(--navy); }
+tr:last-child td { border-bottom:0; }
+.pass { font-weight:800; color:#168052; }
+.fail { font-weight:800; color:#c33b3b; }
+.site-footer {
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  padding:25px 0 35px;
+  font-size:13px;
+}
+.footer-flex {
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.footer-flex a { color:var(--navy); font-weight:700; }
+@media(max-width:850px) {
+  .navbar { flex-direction:column; align-items:flex-start; padding:16px 0; }
+  .spec-grid,.controls,.metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:600px) {
+  .wrap { width:calc(100% - 24px); }
+  .hero { margin-top:14px; padding:28px 22px; border-radius:16px; }
+  .panel { padding:21px 16px; }
+  .spec-grid,.controls,.metrics { grid-template-columns:1fr; }
+  .chart-area { height:260px; }
+  .choices { flex-direction:column; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="navbar wrap" aria-label="Main navigation">
+    <a class="brand" href="index.html">
+      <span class="brand-icon">∿</span>
+      <span>Dynamics &amp; Control<small>ENCS4380 · BIRZEIT UNIVERSITY</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Dynamics Toolkit</a>
+      <a href="control.html">Control Lab</a>
+      <a href="pid-playground.html">PID Playground</a>
+      <a href="slow-sensor.html">Sensor Delay</a>
+      <a class="current" href="tuning-challenge.html" aria-current="page">Tuning Challenge</a>
+    </div>
+  </nav>
+</header>
+
+<main class="wrap">
+
+<section class="hero">
+  <div class="eyebrow">Interactive Control Systems / Module 04</div>
+  <h1>PID Tuning Challenge</h1>
+  <p>
+    A hidden random plant has been generated. Tune Kp, Ki, and Kd using live RK4 simulation
+    until all three closed-loop performance specifications pass.
+  </p>
+  <div class="hero-bottom">
+    <span>Hidden random plant</span>
+    <span>Pass / Fail spec verification</span>
+    <span>Live scoring &amp; validation checks</span>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-head">
+    <div>
+      <div class="kicker">Target specifications</div>
+      <h2>Round <span id="roundNum">1</span> — Meet all three specs</h2>
+    </div>
+    <div class="score-pill">
+      Round Score: <span id="roundScore">0</span> / 100 &nbsp;·&nbsp; Session Total: <span id="sessionScore">0</span>
+    </div>
+  </div>
+
+  <div class="spec-grid">
+    <div class="spec-card" id="cardOS">
+      <div class="spec-title">1. Maximum Overshoot</div>
+      <div class="spec-target" id="targetOS">≤ 10.0%</div>
+      <div class="spec-actual">
+        <span>Current: <strong id="actualOS">—</strong></span>
+        <span class="badge" id="badgeOS">—</span>
+      </div>
+    </div>
+
+    <div class="spec-card" id="cardTS">
+      <div class="spec-title">2. Settling Time (2%)</div>
+      <div class="spec-target" id="targetTS">≤ 2.50 s</div>
+      <div class="spec-actual">
+        <span>Current: <strong id="actualTS">—</strong></span>
+        <span class="badge" id="badgeTS">—</span>
+      </div>
+    </div>
+
+    <div class="spec-card" id="cardSSE">
+      <div class="spec-title">3. Steady-State Error</div>
+      <div class="spec-target" id="targetSSE">≤ 1.0%</div>
+      <div class="spec-actual">
+        <span>Current: <strong id="actualSSE">—</strong></span>
+        <span class="badge" id="badgeSSE">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="field">
+      <label for="kp">Proportional gain (Kp) <output id="vkp">1.0</output></label>
+      <input id="kp" type="range" min="0" max="25" step="0.1" value="1">
+    </div>
+    <div class="field">
+      <label for="ki">Integral gain (Ki) <output id="vki">0.0</output></label>
+      <input id="ki" type="range" min="0" max="15" step="0.1" value="0">
+    </div>
+    <div class="field">
+      <label for="kd">Derivative gain (Kd) <output id="vkd">0.0</output></label>
+      <input id="kd" type="range" min="0" max="10" step="0.1" value="0">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button type="button" class="btn teal" id="submitRound">Submit &amp; Claim Score</button>
+    <button type="button" class="btn" id="newPlantBtn">New Random Plant</button>
+    <button type="button" class="btn outline" id="hintBtn">Show Hint</button>
+    <button type="button" class="btn outline" id="revealBtn">Reveal Hidden Plant</button>
+  </div>
+
+  <div class="reveal-box" id="infoBox" aria-live="polite"></div>
+</section>
+
+<section class="panel">
+  <div class="section-head">
+    <div>
+      <div class="kicker">Live closed-loop response</div>
+      <h2>Step Response &amp; Metrics</h2>
+    </div>
+    <span class="small">Setpoint step r = 1.0 · Control limit ±20</span>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><label>Rise time (10–90%)</label><strong id="mRise">—</strong></div>
+    <div class="metric"><label>Overshoot</label><strong id="mOS">—</strong></div>
+    <div class="metric"><label>Settling time (2%)</label><strong id="mTS">—</strong></div>
+    <div class="metric"><label>Steady-state error</label><strong id="mSSE">—</strong></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-area">
+      <canvas id="challengeChart" aria-label="Hidden plant closed-loop step response"></canvas>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-head">
+    <div>
+      <div class="kicker">Predict, then check</div>
+      <h2>Think before tuning</h2>
+    </div>
+  </div>
+  <div class="predict">
+    <p><strong>Suppose your current controller has zero steady-state error, meets the settling time, but has 22% overshoot (above the 10% spec). Which adjustment best reduces the overshoot?</strong></p>
+    <div class="choices">
+      <label><input type="radio" name="pred4" value="a"> Increase Ki significantly</label>
+      <label><input type="radio" name="pred4" value="b"> Increase Kd (or slightly reduce Kp)</label>
+      <label><input type="radio" name="pred4" value="c"> Set Kd = 0 and double Kp</label>
+    </div>
+    <button type="button" class="btn" id="checkPred4" style="margin-top:14px">Check prediction</button>
+    <p id="predictionResult" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="panel" id="validation">
+  <div class="section-head">
+    <div>
+      <div class="kicker">Homework 2 · Section 2.1</div>
+      <h2>Automated Solver Validation Checks</h2>
+    </div>
+    <p class="small" style="max-width:420px;margin:0">
+      Automatically verifies the RK4 closed-loop solver against the three analytical reference benchmarks for G(s) = 1 / (s + 1).
+    </p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Validation Check</th>
+          <th>Theoretical Target</th>
+          <th>RK4 Simulated Value</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="validationBody"></tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-flex">
+    <span>Dynamics &amp; Control · ENCS4380 · Birzeit University · Module 04 &amp; Validation by Maysam Abu Eid</span>
+    <span><a href="control.html">← Control Lab</a> &nbsp;·&nbsp; <a href="pid-playground.html">PID Playground</a> &nbsp;·&nbsp; <a href="slow-sensor.html">Sensor Delay</a></span>
+  </div>
+</footer>
+
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const fmt = (x, n = 2) => Number.isFinite(x) ? x.toFixed(n) : 'n/a';
+
+let hiddenPlant = null;
+let spec = null;
+let round = 1;
+let sessionTotal = 0;
+let roundClaimed = false;
+
+// RK4 Closed-Loop ODE Solver
+function derivative(c, x) {
+  const [y, v, integral] = x;
+  const e = c.ref - y;
+  const pi = c.kp * e + c.ki * integral;
+
+  if (c.plant === 'first') {
+    const A = pi + c.kd * y / c.tau;
+    const B = c.kd * c.K / c.tau;
+    const u = clamp(A / (1 + B), -c.limit, c.limit);
+    return [(c.K * u - y) / c.tau, 0, e];
+  }
+
+  const raw = pi - c.kd * v;
+  const u = clamp(raw, -c.limit, c.limit);
+  return [v, (u - c.b * v - c.k * y) / c.m, e];
+}
+
+const addState = (x, d, h) => x.map((val, i) => val + h * d[i]);
+
+function simulate(c, N = 5000, tMax = 12) {
+  const h = tMax / N;
+  const x = [0, 0, 0];
+  const pts = [];
+  let peak = -Infinity;
+
+  for (let i = 0; i <= N; i++) {
+    const t = i * h;
+    pts.push({ t, y: x[0] });
+    if (x[0] > peak) peak = x[0];
+    if (i === N) break;
+
+    const k1 = derivative(c, x);
+    const k2 = derivative(c, addState(x, k1, h / 2));
+    const k3 = derivative(c, addState(x, k2, h / 2));
+    const k4 = derivative(c, addState(x, k3, h));
+
+    for (let j = 0; j < 3; j++) {
+      x[j] += h * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j]) / 6;
+    }
+    if (!x.every(Number.isFinite) || Math.abs(x[0]) > 1e6) break;
+  }
+
+  return { pts, tMax, peak };
+}
+
+function computeMetrics(c, sim) {
+  const p = sim.pts;
+  const fin = c.ki > 0 ? c.ref : (c.K * c.kp * c.ref) / (1 + c.K * c.kp);
+
+  const cross = level => {
+    for (let i = 1; i < p.length; i++) {
+      if (p[i - 1].y < level && p[i].y >= level) {
+        return p[i - 1].t + (level - p[i - 1].y) * (p[i].t - p[i - 1].t) / (p[i].y - p[i - 1].y);
+      }
+    }
+    return NaN;
+  };
+
+  const t10 = cross(0.1 * fin);
+  const t90 = cross(0.9 * fin);
+  const rise = Number.isFinite(t10) && Number.isFinite(t90) ? (t90 - t10) : NaN;
+  const overshoot = fin > 1e-6 ? Math.max(0, (sim.peak - fin) / fin) * 100 : NaN;
+
+  const band = Math.max(0.02 * Math.abs(fin), 1e-4);
+  let last = -1;
+  for (let i = 0; i < p.length; i++) {
+    if (Math.abs(p[i].y - fin) > band) last = i;
+  }
+  const settling = (last < p.length - 1 && Number.isFinite(p[p.length - 1].y))
+    ? (last < 0 ? 0 : p[last + 1].t)
+    : NaN;
+
+  const tail = p.slice(-Math.min(80, p.length));
+  const yEnd = tail.reduce((acc, q) => acc + q.y, 0) / tail.length;
+  const ssePct = Math.abs((c.ref - yEnd) / c.ref) * 100;
+
+  return { rise, overshoot, settling, ssePct, sseAbs: Math.abs(c.ref - yEnd) };
+}
+
+const chart = new Chart($('challengeChart'), {
+  type: 'line',
+  data: {
+    datasets: [
+      { label: 'Setpoint r(t)', data: [], borderColor: '#c66262', borderDash: [7, 5], borderWidth: 2, pointRadius: 0 },
+      { label: 'Upper 2% Band', data: [], borderColor: '#94a3b8', borderDash: [3, 4], borderWidth: 1.2, pointRadius: 0 },
+      { label: 'Lower 2% Band', data: [], borderColor: '#94a3b8', borderDash: [3, 4], borderWidth: 1.2, pointRadius: 0 },
+      { label: 'Measured Output y(t)', data: [], borderColor: '#087e87', borderWidth: 2.6, pointRadius: 0 }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    parsing: false,
+    scales: {
+      x: { type: 'linear', title: { display: true, text: 'Time (s)' } },
+      y: { title: { display: true, text: 'Output y(t)' }, suggestedMin: 0, suggestedMax: 1.4 }
+    }
+  }
+});
+
+function generateChallenge() {
+  const isFirst = Math.random() < 0.5;
+  if (isFirst) {
+    const K = +(0.6 + Math.random() * 1.8).toFixed(2);
+    const tau = +(0.8 + Math.random() * 2.2).toFixed(2);
+    hiddenPlant = { plant: 'first', K, tau, m: 1, b: 2, k: 4, noise: 0.008 };
+  } else {
+    const m = +(0.8 + Math.random() * 1.4).toFixed(2);
+    const b = +(0.6 + Math.random() * 2.2).toFixed(2);
+    const k = +(2.0 + Math.random() * 4.5).toFixed(2);
+    hiddenPlant = { plant: 'second', K: 1 / k, tau: 1, m, b, k, noise: 0.008 };
+  }
+
+  spec = {
+    maxOS: [5, 8, 10, 12][Math.floor(Math.random() * 4)],
+    maxTS: +(1.8 + Math.random() * 1.8).toFixed(1),
+    maxSSE: 1.0
+  };
+
+  roundClaimed = false;
+  $('roundNum').textContent = round;
+  $('targetOS').textContent = `≤ ${spec.maxOS.toFixed(1)}%`;
+  $('targetTS').textContent = `≤ ${spec.maxTS.toFixed(2)} s`;
+  $('targetSSE').textContent = `≤ ${spec.maxSSE.toFixed(1)}%`;
+  $('infoBox').className = 'reveal-box';
+  $('infoBox').textContent = '';
+
+  $('kp').value = 1.0;
+  $('ki').value = 0.0;
+  $('kd').value = 0.0;
+  updateChallenge();
+}
+
+function updateCard(cardId, badgeId, actualId, valStr, passed) {
+  const card = $(cardId);
+  const badge = $(badgeId);
+  $(actualId).textContent = valStr;
+  card.classList.remove('ok', 'bad');
+  badge.classList.remove('pass', 'fail');
+  card.classList.add(passed ? 'ok' : 'bad');
+  badge.classList.add(passed ? 'pass' : 'fail');
+  badge.textContent = passed ? 'PASS' : 'FAIL';
+}
+
+function updateChallenge() {
+  const kp = +$('kp').value;
+  const ki = +$('ki').value;
+  const kd = +$('kd').value;
+  $('vkp').textContent = kp.toFixed(1);
+  $('vki').textContent = ki.toFixed(1);
+  $('vkd').textContent = kd.toFixed(1);
+
+  const cfg = { ...hiddenPlant, kp, ki, kd, ref: 1.0, limit: 20 };
+  const sim = simulate(cfg, 4500, 10);
+  const m = computeMetrics(cfg, sim);
+
+  $('mRise').textContent = Number.isFinite(m.rise) ? `${fmt(m.rise, 2)} s` : 'Not reached';
+  $('mOS').textContent = Number.isFinite(m.overshoot) ? `${fmt(m.overshoot, 1)}%` : 'n/a';
+  $('mTS').textContent = Number.isFinite(m.settling) ? `${fmt(m.settling, 2)} s` : 'Not settled';
+  $('mSSE').textContent = `${fmt(m.ssePct, 2)}%`;
+
+  const passOS = Number.isFinite(m.overshoot) && m.overshoot <= spec.maxOS;
+  const passTS = Number.isFinite(m.settling) && m.settling <= spec.maxTS;
+  const passSSE = Number.isFinite(m.ssePct) && m.ssePct <= spec.maxSSE;
+
+  updateCard('cardOS', 'badgeOS', 'actualOS', Number.isFinite(m.overshoot) ? `${fmt(m.overshoot, 1)}%` : 'n/a', passOS);
+  updateCard('cardTS', 'badgeTS', 'actualTS', Number.isFinite(m.settling) ? `${fmt(m.settling, 2)} s` : 'Not settled', passTS);
+  updateCard('cardSSE', 'badgeSSE', 'actualSSE', `${fmt(m.ssePct, 2)}%`, passSSE);
+
+  const passedCount = (passOS ? 1 : 0) + (passTS ? 1 : 0) + (passSSE ? 1 : 0);
+  const score = passedCount === 3 ? 100 : passedCount * 30;
+  $('roundScore').textContent = score;
+
+  const sampled = sim.pts.filter((_, i) => i % 8 === 0 || i === sim.pts.length - 1);
+  chart.data.datasets[0].data = [{ x: 0, y: 1 }, { x: sim.tMax, y: 1 }];
+  chart.data.datasets[1].data = [{ x: 0, y: 1.02 }, { x: sim.tMax, y: 1.02 }];
+  chart.data.datasets[2].data = [{ x: 0, y: 0.98 }, { x: sim.tMax, y: 0.98 }];
+  chart.data.datasets[3].data = sampled.map(pt => ({ x: pt.t, y: pt.y }));
+  chart.update();
+}
+
+$('submitRound').addEventListener('click', () => {
+  const score = +$('roundScore').textContent;
+  const box = $('infoBox');
+  box.className = 'reveal-box show';
+  if (roundClaimed) {
+    box.innerHTML = '<strong>Already submitted:</strong> Click <em>New Random Plant</em> to start the next round.';
+    return;
+  }
+  if (score === 100) {
+    roundClaimed = true;
+    sessionTotal += 100;
+    $('sessionScore').textContent = sessionTotal;
+    box.innerHTML = '<strong>All specifications passed! (+100 points)</strong> Click <em>New Random Plant</em> for another challenge.';
+  } else {
+    box.innerHTML = `<strong>Not all specs passed yet (${score}/100):</strong> Adjust Kp, Ki, and Kd until all three cards show PASS.`;
+  }
+});
+
+$('newPlantBtn').addEventListener('click', () => {
+  round += 1;
+  generateChallenge();
+});
+
+$('hintBtn').addEventListener('click', () => {
+  const box = $('infoBox');
+  box.className = 'reveal-box show';
+  box.innerHTML = hiddenPlant.plant === 'first'
+    ? '<strong>Hint:</strong> This behaves like a <em>first-order plant</em>. Start with Ki &gt; 0 to remove steady-state error, raise Kp to speed up settling, and add small Kd if overshoot exceeds the limit.'
+    : '<strong>Hint:</strong> This behaves like an <em>underdamped second-order plant</em>. Increase Kd to damp oscillations and reduce overshoot, then balance Kp and Ki for fast settling with zero steady-state error.';
+});
+
+$('revealBtn').addEventListener('click', () => {
+  const box = $('infoBox');
+  box.className = 'reveal-box show';
+  if (hiddenPlant.plant === 'first') {
+    box.innerHTML = `<strong>Hidden Plant Revealed:</strong> First-order system G(s) = ${hiddenPlant.K} / (${hiddenPlant.tau}s + 1)`;
+  } else {
+    const wn = Math.sqrt(hiddenPlant.k / hiddenPlant.m);
+    const zeta = hiddenPlant.b / (2 * Math.sqrt(hiddenPlant.k * hiddenPlant.m));
+    box.innerHTML = `<strong>Hidden Plant Revealed:</strong> Second-order mass-spring-damper (m = ${hiddenPlant.m}, b = ${hiddenPlant.b}, k = ${hiddenPlant.k} → ωn = ${fmt(wn, 2)} rad/s, ζ = ${fmt(zeta, 2)})`;
+  }
+});
+
+$('checkPred4').addEventListener('click', () => {
+  const sel = document.querySelector('input[name="pred4"]:checked');
+  const out = $('predictionResult');
+  if (!sel) {
+    out.textContent = 'Select an option first.';
+    return;
+  }
+  out.textContent = sel.value === 'b'
+    ? 'Correct! Derivative gain Kd adds damping that suppresses overshoot, while Ki increases overshoot.'
+    : 'Not quite. Increasing Kp or Ki makes the response more aggressive and increases overshoot; increasing Kd adds damping.';
+});
+
+// Automated Validation Checks (Homework 2 - Section 2.1)
+function runValidationChecks() {
+  const base = { plant: 'first', K: 1, tau: 1, kp: 9, ki: 0, kd: 0, ref: 1, limit: 50, m: 1, b: 2, k: 4 };
+
+  // 1. P-only: Kp = 9 -> tau_cl = 0.1 s, SSE = 10%
+  const s1 = simulate(base, 8000, 15);
+  const m1 = computeMetrics(base, s1);
+  const target63 = 0.9 * (1 - Math.exp(-1));
+  let tauCl = NaN;
+  for (let i = 1; i < s1.pts.length; i++) {
+    if (s1.pts[i].y >= target63) {
+      const a = s1.pts[i - 1], b = s1.pts[i];
+      tauCl = a.t + (target63 - a.y) * (b.t - a.t) / (b.y - a.y);
+      break;
+    }
+  }
+  const pass1 = Math.abs(tauCl - 0.1) < 0.002 && Math.abs(m1.ssePct - 10) < 0.05;
+
+  // 2. PI: Kp = 1, Ki = 1 -> wn = 1 rad/s, zeta = 1
+  const piCfg = { ...base, kp: 1, ki: 1 };
+  const wn = Math.sqrt((piCfg.K * piCfg.ki) / piCfg.tau);
+  const zeta = (1 + piCfg.K * piCfg.kp) / (2 * Math.sqrt(piCfg.tau * piCfg.K * piCfg.ki));
+  const pass2 = Math.abs(wn - 1) < 1e-6 && Math.abs(zeta - 1) < 1e-6;
+
+  // 3. Any PI controller -> zero steady-state error for step
+  const s3 = simulate(piCfg, 8000, 30);
+  const m3 = computeMetrics(piCfg, s3);
+  const pass3 = m3.sseAbs < 0.001;
+
+  const checks = [
+    ['1. P-only (Kp = 9)', 'τcl = 0.100 s, SSE = 10.0%', `τcl = ${fmt(tauCl, 3)} s, SSE = ${fmt(m1.ssePct, 2)}%`, pass1],
+    ['2. PI Damping (Kp = 1, Ki = 1)', 'ωn = 1.00 rad/s, ζ = 1.00', `ωn = ${fmt(wn, 2)} rad/s, ζ = ${fmt(zeta, 2)}`, pass2],
+    ['3. Any PI Steady-State Accuracy', 'Steady-state error → 0', `Error at t = 30 s: ${fmt(m3.sseAbs, 5)}`, pass3]
+  ];
+
+  $('validationBody').innerHTML = checks.map(row =>
+    `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td class="${row[3] ? 'pass' : 'fail'}">${row[3] ? 'PASS' : 'FAIL'}</td></tr>`
+  ).join('');
+}
+
+['kp', 'ki', 'kd'].forEach(id => $(id).addEventListener('input', updateChallenge));
+
+runValidationChecks();
+generateChallenge();
+</script>
+</body>
+</html>
