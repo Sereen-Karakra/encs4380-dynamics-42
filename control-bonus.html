@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Bonus: state-feedback pole placement on the mass-spring-damper model from Module 3.">
+<title>State-Space Control | Control Lab</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--navy:#172d4b;--blue:#2563a9;--teal:#087e87;--ink:#263748;--muted:#64748b;--bg:#f2f6fa;--line:#dfe8f0}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+a{color:inherit;text-decoration:none}
+.wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+.site-header{background:#fff;border-bottom:1px solid var(--line)}
+.navbar{display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:76px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;color:var(--navy)}
+.brand-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,var(--navy),var(--teal));color:#fff;font-size:22px}
+.brand small{display:block;margin-top:3px;font-size:11px;letter-spacing:.15em;color:var(--muted)}
+.nav-links{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.nav-links a{font-size:14px;font-weight:600;color:#52667b;padding:10px 13px;border-radius:9px}
+.nav-links a:hover{background:#edf4fa}
+.nav-links .current{background:var(--navy);color:#fff}
+.hero{margin:28px 0 24px;border-radius:22px;padding:40px 44px;background:linear-gradient(118deg,#142b48,#244d70 65%,#0d737b);color:#fff;box-shadow:0 18px 38px #19334d15}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#9eebea}
+.hero h1{font-size:clamp(35px,4.8vw,54px);letter-spacing:-.045em;line-height:1.1;margin:13px 0}
+.hero p{max-width:760px;color:#dce9f5;line-height:1.7;margin:0}
+.hero-bottom{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.hero-bottom span{font-size:12px;font-weight:700;padding:8px 11px;border:1px solid #ffffff50;border-radius:30px;background:#ffffff12}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:27px 30px;box-shadow:0 7px 24px #19334d09;margin:18px 0}
+.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.kicker{color:var(--teal);font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:800}
+h2{color:var(--navy);font-size:clamp(23px,3vw,29px);letter-spacing:-.025em;margin:7px 0 0}
+h3{color:var(--navy);font-size:18px;margin:14px 0 10px}
+.small{color:var(--muted);line-height:1.65;font-size:13px}
+.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.field{background:#f8fbfd;border:1px solid var(--line);padding:16px;border-radius:12px}
+.field label{display:flex;justify-content:space-between;gap:8px;color:var(--navy);font-size:14px;font-weight:700;margin-bottom:12px}
+.field output{color:var(--teal);font-variant-numeric:tabular-nums}
+.field input[type=range]{width:100%;accent-color:var(--teal);cursor:pointer}
+.equation{font:13px/1.75 Consolas,'Courier New',monospace;color:#325675;background:#eef5fa;border-radius:8px;padding:10px 13px;overflow-x:auto;margin:12px 0}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:16px}
+.metric{border:1px solid var(--line);border-radius:13px;padding:16px;background:#f8fbfd;border-top:3px solid var(--teal)}
+.metric label{display:block;color:var(--muted);font-weight:600;font-size:13px;min-height:32px}
+.metric strong{display:block;margin-top:8px;color:var(--navy);font-size:clamp(17px,2.1vw,24px);font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:16px}
+.chart-card{border:1px solid var(--line);padding:18px;border-radius:14px;margin-top:16px}
+.chart-card h3{margin:2px 0 13px}
+.chart-area{height:310px;position:relative}
+.predict{border-left:4px solid var(--teal);border-radius:10px;background:#f3f9fb;padding:19px 22px}
+.choices{display:flex;flex-wrap:wrap;gap:10px}
+.choices label{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:11px 12px;font-size:13px;cursor:pointer}
+.btn{padding:11px 16px;background:var(--navy);border:0;border-radius:9px;color:#fff;font:700 13px 'Segoe UI',Arial;cursor:pointer;margin-top:14px}
+.btn:hover{background:#284f72}
+#predictionResult{font-weight:600;color:#176b72;margin:12px 0 0;font-size:14px}
+.notice{border:1px solid #e8d5ad;background:#fff9ee;color:#765021;border-radius:10px;padding:13px 16px;font-size:13px;line-height:1.7;margin:14px 0}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:12px 15px;border-bottom:1px solid var(--line)}
+th{background:#eef4f9;color:var(--navy)}
+tr:last-child td{border-bottom:0}
+.pass{font-weight:800;color:#168052}.fail{font-weight:800;color:#c33b3b}
+.site-footer{border-top:1px solid var(--line);color:var(--muted);padding:25px 0 35px;font-size:13px}
+.footer-flex{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.footer-flex a{color:var(--navy);font-weight:700}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #77ccd2;outline-offset:3px}
+@media(max-width:850px){.navbar{flex-direction:column;align-items:flex-start;padding:16px 0}.controls,.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.wrap{width:calc(100% - 24px)}.hero{margin-top:14px;padding:28px 22px;border-radius:16px}.panel{padding:21px 16px}.controls,.metrics{grid-template-columns:1fr}.chart-area{height:260px}.nav-links a{padding:8px 9px;font-size:12px}.choices{flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <nav class="navbar wrap" aria-label="Main navigation">
+    <a class="brand" href="index.html"><span class="brand-icon">∿</span><span>Dynamics &amp; Control<small>ENCS4380 · BIRZEIT UNIVERSITY</small></span></a>
+    <div class="nav-links">
+      <a href="index.html">Dynamics Toolkit</a>
+      <a href="control.html">Control Lab</a>
+      <a href="my-system.html">My System</a>
+      <a class="current" href="control-bonus.html" aria-current="page">Advanced Lab</a>
+    </div>
+  </nav>
+</header>
+
+<main class="wrap">
+<section class="hero">
+  <div class="eyebrow">Control Lab / Bonus</div>
+  <h1>State-Space Control: Place the Poles</h1>
+  <p>Take the mass-spring-damper model from Module 3 and choose where the closed-loop poles go. State feedback u = −Kx + N·r gives the response you ask for, directly from ζ and ωn.</p>
+  <div class="hero-bottom"><span>Pole placement</span><span>State feedback u = −Kx</span><span>Open loop vs closed loop</span></div>
+</section>
+
+<section class="panel">
+  <div class="section-head"><div><div class="kicker">The model</div><h2>Mass-spring-damper in state space</h2></div></div>
+  <div class="equation">m·x″ + b·x′ + k·x = u &nbsp;|&nbsp; x₁ = x, x₂ = x′<br>
+    A = [ 0 &nbsp; 1 ; −k/m &nbsp; −b/m ], &nbsp; B = [ 0 ; 1/m ], &nbsp; C = [ 1 &nbsp; 0 ]<br>
+    Feedback: u = −k₁·x₁ − k₂·x₂ + N·r</div>
+  <div class="equation">Closed loop: m·x″ + (b + k₂)·x′ + (k + k₁)·x = N·r<br>
+    Match to m·(s² + 2ζωn·s + ωn²):<br>
+    k₁ = m·ωn² − k &nbsp;|&nbsp; k₂ = 2ζωn·m − b &nbsp;|&nbsp; N = k + k₁ = m·ωn² (so the final value equals r)</div>
+  <div class="controls">
+    <div class="field"><label for="m">Mass m <output id="vm"></output></label><input id="m" type="range" min="0.5" max="5" step="0.1" value="1"></div>
+    <div class="field"><label for="b">Damping b <output id="vb"></output></label><input id="b" type="range" min="0" max="12" step="0.1" value="2"></div>
+    <div class="field"><label for="k">Stiffness k <output id="vk"></output></label><input id="k" type="range" min="0.5" max="20" step="0.5" value="4"></div>
+    <div class="field"><label for="zeta">Desired ζ <output id="vzeta"></output></label><input id="zeta" type="range" min="0.2" max="1.5" step="0.01" value="0.7"></div>
+    <div class="field"><label for="wn">Desired ωn (rad/s) <output id="vwn"></output></label><input id="wn" type="range" min="0.5" max="10" step="0.05" value="4"></div>
+    <div class="field"><label for="r">Reference r <output id="vr"></output></label><input id="r" type="range" min="0.5" max="5" step="0.5" value="1"></div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><label>k₁ (position gain)</label><strong id="oK1">—</strong></div>
+    <div class="metric"><label>k₂ (velocity gain)</label><strong id="oK2">—</strong></div>
+    <div class="metric"><label>N (reference gain)</label><strong id="oN">—</strong></div>
+    <div class="metric"><label>Peak control force |u|</label><strong id="oU">—</strong></div>
+  </div>
+  <p class="small" id="poleLine"></p>
+</section>
+
+<section class="panel">
+  <div class="section-head"><div><div class="kicker">Predict, then check</div><h2>Think before you move the slider</h2></div></div>
+  <div class="predict">
+    <p><strong>You keep ζ fixed and double the desired ωn. What happens to the required feedback gains and the peak control force?</strong></p>
+    <div class="choices">
+      <label><input type="radio" name="pred" value="a"> The gains and the peak force grow (k₁ grows with ωn²)</label>
+      <label><input type="radio" name="pred" value="b"> They stay the same, only the poles move</label>
+      <label><input type="radio" name="pred" value="c"> They shrink, a faster system needs less force</label>
+    </div>
+    <button class="btn" type="button" id="checkPred">Check prediction</button>
+    <p id="predictionResult" role="status" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-head"><div><div class="kicker">Results</div><h2>Open loop vs. closed loop</h2></div></div>
+  <div class="metrics" style="margin-top:0">
+    <div class="metric"><label>Overshoot (closed loop)</label><strong id="mOS">—</strong></div>
+    <div class="metric"><label>Peak time (closed loop)</label><strong id="mPk">—</strong></div>
+    <div class="metric"><label>Settling time 2 % (closed loop)</label><strong id="mTS">—</strong></div>
+    <div class="metric"><label>Settling time 2 % (open loop)</label><strong id="mTSo">—</strong></div>
+  </div>
+  <div class="chart-card"><h3>Step response: position x(t)</h3><div class="chart-area"><canvas id="stepChart"></canvas></div></div>
+  <div class="grid2">
+    <div class="chart-card"><h3>Poles in the s-plane</h3><div class="chart-area"><canvas id="poleChart"></canvas></div></div>
+    <div class="chart-card"><h3>Control force u(t)</h3><div class="chart-area"><canvas id="uChart"></canvas></div></div>
+  </div>
+  <div class="notice">State feedback needs both position and velocity. On real hardware you measure position with a sensor and need a velocity measurement or an estimator (for example from the encoder). Large k₁ or k₂ also mean large forces, so a real actuator limit would cap how fast you can place the poles.</div>
+</section>
+
+<section class="panel">
+  <div class="section-head"><div><div class="kicker">Model accuracy</div><h2>Validation checks</h2></div><p class="small" style="max-width:420px;margin:0">Fixed cases for m = 1, b = 2, k = 4. They do not depend on the sliders.</p></div>
+  <div class="table-wrap"><table><thead><tr><th>Check</th><th>Expected</th><th>Calculated</th><th>Result</th></tr></thead><tbody id="valBody"></tbody></table></div>
+</section>
+
+<section class="panel">
+  <div class="section-head"><div><div class="kicker">Documentation</div><h2>Method and AI use</h2></div></div>
+  <p class="small"><b>Method:</b> pole placement by matching coefficients. Because the plant is second order and fully measured, the closed-loop poles can be placed anywhere. The simulation uses our own RK4 solver on x′ = A·x + B·u with u = −K·x + N·r, the same approach as the phase plane in Module 3.</p>
+  <p class="small"><b>AI use:</b> Claude was used to help build this page (derivation check, solver reuse, layout). The author must be able to explain every equation and line of code in the demo.</p>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-flex">
+    <span>Dynamics &amp; Control · ENCS4380 · Birzeit University · Bonus: state-space control</span>
+    <span><a href="control.html">← Control Lab</a> &nbsp;·&nbsp; <a href="index.html">Dynamics Toolkit</a></span>
+  </div>
+</footer>
+
+<script>
+'use strict';
+// CORE-START
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const num = (x, n = 3) => Number.isFinite(x) ? x.toFixed(n) : 'n/a';
+
+// Pole placement for m x'' + b x' + k x = u with u = -k1 x - k2 v + N r
+function placePoles(m, b, k, zeta, wn) {
+  const k1 = m * wn * wn - k, k2 = 2 * zeta * wn * m - b;
+  return { k1, k2, N: k + k1 };
+}
+
+// Eigenvalues of a 2x2 matrix: lambda^2 - tr*lambda + det = 0
+function eig2(A) {
+  const tr = A[0][0] + A[1][1], det = A[0][0] * A[1][1] - A[0][1] * A[1][0], d = tr * tr - 4 * det;
+  if (d >= 0) return [[(tr + Math.sqrt(d)) / 2, 0], [(tr - Math.sqrt(d)) / 2, 0]];
+  return [[tr / 2, Math.sqrt(-d) / 2], [tr / 2, -Math.sqrt(-d) / 2]];
+}
+
+// Simulate x' = A x + B u with the control law u(x) provided; RK4.
+function simulate(p, control, tMax, N = 4000) {
+  const f = x => {
+    const u = control(x);
+    return { dx: [x[1], (u - p.b * x[1] - p.k * x[0]) / p.m], u };
+  };
+  const h = tMax / N, pts = [];
+  let x = [0, 0];
+  for (let i = 0; i <= N; i++) {
+    const a = f(x);
+    pts.push({ t: i * h, y: x[0], u: a.u });
+    if (i === N) break;
+    const add = (v, d, s) => v.map((q, j) => q + s * d[j]);
+    const k1 = a.dx, k2 = f(add(x, k1, h / 2)).dx, k3 = f(add(x, k2, h / 2)).dx, k4 = f(add(x, k3, h)).dx;
+    x = x.map((v, j) => v + h * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j]) / 6);
+    if (!x.every(Number.isFinite)) break;
+  }
+  return pts;
+}
+
+function stepMetrics(pts, fin) {
+  let iMax = 0;
+  pts.forEach((q, i) => { if (q.y > pts[iMax].y) iMax = i; });
+  const over = Math.max(0, (pts[iMax].y - fin) / fin) * 100;
+  let last = -1;
+  pts.forEach((q, i) => { if (Math.abs(q.y - fin) > 0.02 * Math.abs(fin)) last = i; });
+  const settle = last < pts.length - 1 ? (last < 0 ? 0 : pts[last + 1].t) : NaN;
+  return { over, peakTime: over > 1e-6 ? pts[iMax].t : NaN, settle, peakU: Math.max(...pts.map(q => Math.abs(q.u))) };
+}
+
+const horizonFor = (zw) => clamp(8 / Math.max(zw, 0.05), 3, 60);
+// CORE-END
+
+const $ = id => document.getElementById(id);
+const mk = (label, color, dashed = false, w = 2.4) => ({ label, data: [], borderColor: color, backgroundColor: color, borderWidth: w, borderDash: dashed ? [7, 5] : [], pointRadius: 0 });
+const lineOpts = y => ({ responsive: true, maintainAspectRatio: false, animation: false, parsing: false,
+  scales: { x: { type: 'linear', title: { display: true, text: 'Time (s)' } }, y: { title: { display: true, text: y } } } });
+
+const stepChart = new Chart($('stepChart'), { type: 'line', data: { datasets: [mk('Reference r', '#c66262', true, 1.6), mk('Open loop (u = k·r, no feedback)', '#a0aec0', true), mk('Closed loop (state feedback)', '#168a97', false, 2.8)] }, options: lineOpts('Position x') });
+const uChart = new Chart($('uChart'), { type: 'line', data: { datasets: [mk('Control force u(t)', '#805ad5')] }, options: lineOpts('Force u') });
+const poleChart = new Chart($('poleChart'), { type: 'scatter', data: { datasets: [
+  { label: 'Open-loop poles', data: [], pointStyle: 'crossRot', pointRadius: 10, borderWidth: 3, borderColor: '#a0aec0' },
+  { label: 'Closed-loop poles', data: [], pointStyle: 'rectRot', pointRadius: 8, backgroundColor: '#168a97', borderColor: '#168a97' }] },
+  options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { x: { title: { display: true, text: 'Real' } }, y: { title: { display: true, text: 'Imaginary' } } } } });
+
+const cx = e => e[1] === 0 ? num(e[0]) : `${num(e[0])} ${e[1] > 0 ? '+' : '−'} j${num(Math.abs(e[1]))}`;
+
+function update() {
+  const m = +$('m').value, b = +$('b').value, k = +$('k').value, zeta = +$('zeta').value, wn = +$('wn').value, r = +$('r').value;
+  $('vm').textContent = m.toFixed(1); $('vb').textContent = b.toFixed(1); $('vk').textContent = k.toFixed(1);
+  $('vzeta').textContent = zeta.toFixed(2); $('vwn').textContent = wn.toFixed(2); $('vr').textContent = r.toFixed(1);
+
+  const g = placePoles(m, b, k, zeta, wn);
+  $('oK1').textContent = num(g.k1, 3); $('oK2').textContent = num(g.k2, 3); $('oN').textContent = num(g.N, 3);
+
+  const p = { m, b, k };
+  const Aol = [[0, 1], [-k / m, -b / m]];
+  const Acl = [[0, 1], [-(k + g.k1) / m, -(b + g.k2) / m]];
+  const eo = eig2(Aol), ec = eig2(Acl);
+  $('poleLine').innerHTML = `<b>Open-loop poles:</b> ${cx(eo[0])}, ${cx(eo[1])} &nbsp;|&nbsp; <b>Closed-loop poles (eigenvalues of A − BK):</b> ${cx(ec[0])}, ${cx(ec[1])} &nbsp;|&nbsp; <b>Desired:</b> ${cx([-zeta * wn, zeta < 1 ? wn * Math.sqrt(1 - zeta * zeta) : 0])}${zeta < 1 ? ', conjugate' : ''}`;
+
+  const zwOl = Math.max(0.05, Math.min(...eo.map(e => Math.abs(e[0])).filter(v => v > 1e-9), 1e3));
+  const tMax = Math.max(horizonFor(zeta * wn), Math.min(60, 8 / zwOl));
+  const closed = simulate(p, x => -g.k1 * x[0] - g.k2 * x[1] + g.N * r, tMax);
+  const open = simulate(p, () => k * r, tMax);
+  const mc = stepMetrics(closed, r), mo = stepMetrics(open, r);
+  $('oU').textContent = num(mc.peakU, 2);
+  $('mOS').textContent = num(mc.over, 2) + ' %';
+  $('mPk').textContent = Number.isFinite(mc.peakTime) ? num(mc.peakTime, 3) + ' s' : 'no overshoot';
+  $('mTS').textContent = Number.isFinite(mc.settle) ? num(mc.settle, 3) + ' s' : 'not settled';
+  $('mTSo').textContent = Number.isFinite(mo.settle) ? num(mo.settle, 3) + ' s' : 'not settled';
+
+  const st = Math.max(1, Math.floor(closed.length / 1200));
+  const sm = a => a.filter((_, i) => i % st === 0 || i === a.length - 1);
+  stepChart.data.datasets[0].data = [{ x: 0, y: r }, { x: tMax, y: r }];
+  stepChart.data.datasets[1].data = sm(open).map(q => ({ x: q.t, y: q.y }));
+  stepChart.data.datasets[2].data = sm(closed).map(q => ({ x: q.t, y: q.y }));
+  stepChart.update();
+  uChart.data.datasets[0].data = sm(closed).map(q => ({ x: q.t, y: q.u }));
+  uChart.update();
+  poleChart.data.datasets[0].data = eo.map(e => ({ x: e[0], y: e[1] }));
+  poleChart.data.datasets[1].data = ec.map(e => ({ x: e[0], y: e[1] }));
+  const lim = Math.max(1, ...eo.concat(ec).map(e => Math.hypot(e[0], e[1]))) * 1.2;
+  poleChart.options.scales.x.min = -lim; poleChart.options.scales.x.max = lim * 0.2;
+  poleChart.options.scales.y.min = -lim; poleChart.options.scales.y.max = lim;
+  poleChart.update();
+}
+
+function runValidation() {
+  const rows = [];
+  const add = (n, e, g, ok) => rows.push(`<tr><td>${n}</td><td>${e}</td><td>${g}</td><td class="${ok ? 'pass' : 'fail'}">${ok ? 'PASS' : 'FAIL'}</td></tr>`);
+  const p = { m: 1, b: 2, k: 4 };
+  // 1. Module 3 check: open loop with zeta = 0.5 overshoots 16.3 %
+  const ol = simulate(p, () => 4, 12, 6000), mo = stepMetrics(ol, 1);
+  add('1. Open loop m=1, b=2, k=4 (ζ = 0.5): overshoot', '16.3 %', num(mo.over, 2) + ' %', Math.abs(mo.over - 16.3) < 0.1);
+  // 2. Gains for zeta = 0.7, wn = 4
+  const g = placePoles(1, 2, 4, 0.7, 4);
+  add('2. Gains for ζ = 0.7, ωn = 4', 'k₁ = 12, k₂ = 3.6, N = 16', `k₁ = ${num(g.k1, 2)}, k₂ = ${num(g.k2, 2)}, N = ${num(g.N, 2)}`, Math.abs(g.k1 - 12) < 1e-9 && Math.abs(g.k2 - 3.6) < 1e-9 && Math.abs(g.N - 16) < 1e-9);
+  // 3. Eigenvalues of A - BK equal the desired poles
+  const ev = eig2([[0, 1], [-(4 + g.k1), -(2 + g.k2)]]);
+  const wd = 4 * Math.sqrt(1 - 0.49);
+  add('3. Eigenvalues of A − BK', `−2.800 ± j${num(wd, 3)}`, `${num(ev[0][0], 3)} ± j${num(Math.abs(ev[0][1]), 3)}`, Math.abs(ev[0][0] + 2.8) < 1e-9 && Math.abs(Math.abs(ev[0][1]) - wd) < 1e-9);
+  // 4. Closed-loop step: overshoot = exp(-pi z / sqrt(1-z^2)) and final value = r
+  const cl = simulate(p, x => -g.k1 * x[0] - g.k2 * x[1] + g.N * 1, 8, 6000), mc = stepMetrics(cl, 1);
+  const th = Math.exp(-Math.PI * 0.7 / Math.sqrt(1 - 0.49)) * 100, fv = cl[cl.length - 1].y;
+  add('4. Closed loop ζ = 0.7: overshoot and final value', `${num(th, 2)} %, final = 1`, `${num(mc.over, 2)} %, final = ${num(fv, 4)}`, Math.abs(mc.over - th) < 0.1 && Math.abs(fv - 1) < 1e-3);
+  $('valBody').innerHTML = rows.join('');
+}
+
+$('checkPred').addEventListener('click', () => {
+  const sel = document.querySelector('input[name="pred"]:checked');
+  $('predictionResult').textContent = !sel ? 'Choose an answer first.' :
+    (sel.value === 'a' ? 'Correct! ' : 'Not quite. ') + 'k₁ = m·ωn² − k grows with ωn², and k₂ = 2ζωn·m − b grows with ωn. A faster response asks the actuator for more force. Check the "Peak control force" card while you move ωn.';
+});
+
+['m', 'b', 'k', 'zeta', 'wn', 'r'].forEach(id => $(id).addEventListener('input', update));
+runValidation();
+update();
+</script>
+</body>
+</html>
