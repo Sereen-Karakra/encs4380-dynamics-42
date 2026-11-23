@@ -12,10 +12,10 @@ The toolkit combines **Homework 1: Dynamic Characteristics** and **Homework 2: P
 
 | Member | Homework 1 | Homework 2 |
 |---|---|---|
+| Maysam Abu Eid | Module 1: First-order time response | P4: Tuning Challenge and validation checks |
 | Dania Abu Ayyash | Module 2: First-order frequency response | P1: PID Playground and simulation engine |
 | Sereen Karakra | Module 3: Second-order response | P2: Slow sensor in the feedback loop |
 | Raneem Khawaja | Module 4: Guess the Sensor | P3: Digital PID |
-| Maysam Abu Eid | Module 1: First-order time response | P4: Tuning Challenge and validation checks |
 | Masa Awad | Bonus: Euler and RK4 solver comparison | My System, project integration, and submission documentation |
 
 ## How to Open the Project
@@ -169,7 +169,7 @@ Steady-state accuracy is evaluated numerically; the current challenge uses a 1% 
 
 ### My System — Micromouse Motor Speed Control
 
-**File:** `my-system.html` · **Owner:** Masa Awad · **Issue:** [#7](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/7)
+**File:** `my-system.html` · **Owner:** Masa Awad · **Issue:** [#7](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/7) — Closed
 
 Applies PI control to a first-order motor model, `G(s) = K/(τs + 1)`.
 
@@ -179,11 +179,11 @@ Applies PI control to a first-order motor model, `G(s) = K/(τs + 1)`.
 - Response and PWM plots, specification checks, and generated Arduino code.
 - Checks for damping ratio 0.6–0.8, PWM demand within 0–100%, and target reachability.
 
-**Current model data:** the supplied page starts with explicitly labelled example values K = 1 and τ = 1 s from the homework handout. Its default ζ = 0.7 and ωn = 1 rad/s give Kp = 0.4 and Ki = 1. These are demonstration values, not measured Micromouse parameters. The page supports entering encoder/PWM measurements or a cited source. Its Arduino `readSpeed()` and driver adapter require hardware-specific implementation.
+**Current model data:** the supplied page starts with explicitly labelled example values K = 1 and τ = 1 s from the homework handout. Its default ζ = 0.7 and ωn = 1 rad/s give Kp = 0.4 and Ki = 1. **These are demonstration values, not measured Micromouse parameters.** Before presenting the model as a real motor design, replace them with encoder/PWM test values or datasheet-supported parameters and cite the source on the My System page. The page supports entering those values. Its Arduino `readSpeed()` and driver adapter require hardware-specific implementation.
 
 ### Homework 2 Bonus — State-Space Control
 
-**File:** `control-bonus.html`**Owner:** Masa Awad · **Issue:** [#7](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/7) | Closed |
+**File:** `control-bonus.html` · **Owner:** Masa Awad · **Issue:** [#7](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/7) — Closed
 
 An additional pole-placement experiment based on the mass–spring–damper model from Homework 1 Module 3.
 
@@ -252,7 +252,7 @@ The same repository contains both assignments. Module ownership is tracked throu
 | P3: Digital PID | Raneem Khawaja | [#9](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/9) | Closed |
 | P4: Tuning Challenge | Maysam Abu Eid | [#8](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/8) | Closed |
 
-**Motor application:** [#7](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/7) — Masa Awad. Its current status is shown on the issue page.
+**Motor application:** [#7](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/7) — Masa Awad. Issue #7 is closed; it currently has no GitHub assignee.
 
 All module issues should be assigned to their respective owners. The repository's [Issues page](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues) records the discussion and completion history.
 
@@ -263,7 +263,7 @@ All module issues should be assigned to their respective owners. The repository'
 | Homework 1 | `v1.0` | 12 November 2026 | 15–16 November 2026 |
 | Homework 2 | `v2.0` | 23 November 2026 | From 24 November 2026 |
 
-Homework 2 was released on 16 November, with a P1/P2 live-site checkpoint on 19 November. Its final submission requires a release tagged **v2.0** and the GitHub Pages link on the course page. The dates above describe the assignment milestones, not confirmation that a release has been published.
+Homework 2 was released on 16 November, with a P1/P2 live-site checkpoint on 19 November. Its final submission requires a release tagged **v2.0** and the GitHub Pages link on the course page. The dates above are assignment milestones. The `v2.0` release must be created only after the final checks and must point to the final reviewed commit.
 
 ## AI Use
 
@@ -271,7 +271,7 @@ AI coding assistants were used as allowed by the assignments. The documented use
 
 | Member | Disclosed assistance |
 |---|---|
-| Dania Abu Ayyash | ChatGPT for Homework 1 Module 2 development, debugging, plots, calculations, and validation checks. |
+| Dania Abu Ayyash | ChatGPT for Homework 1 Module 2 and Homework 2 P1: coding support, debugging, numerical simulation, PID calculations, validation, and UI design. The solutions were reviewed and tested by the student. |
 | Sereen Karakra | Claude for Homework 1 Module 3 (equations, poles, RK4, plot sampling). ChatGPT and Claude for Homework 2 P2 (sensor-in-the-loop model, layout). |
 | Raneem Khawaja | ChatGPT for Homework 1 Module 4 and Homework 2 P3 coding assistance, issue text, and documentation. |
 | Maysam Abu Eid | AI assistance for Homework 1 Module 1 review, ramp/error calculations, markers, validation, issue text, and README preparation. |
