@@ -300,9 +300,9 @@ Each member is responsible for checking their results and explaining their own c
 ![Tuning Challenge](screenshots/png8.png)
 
 ### My System: Motor Speed Control
-![Motor Speed Control](screenshots/hw2-my-system.png)
+![Motor Speed Control](screenshots/png9.png)
 
 ### Bonus: State-Space Control
-![State-Space Control](screenshots/hw2-bonus.png)
+![State-Space Control](screenshots/png10.png)
 
 </details>
