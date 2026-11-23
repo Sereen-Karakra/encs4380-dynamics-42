@@ -183,7 +183,7 @@ Applies PI control to a first-order motor model, `G(s) = K/(τs + 1)`.
 
 ### Homework 2 Bonus — State-Space Control
 
-**File:** `control-bonus.html`
+**File:** `control-bonus.html`**Owner:** Masa Awad · **Issue:** [#7](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/7) | Closed |
 
 An additional pole-placement experiment based on the mass–spring–damper model from Homework 1 Module 3.
 
@@ -275,7 +275,7 @@ AI coding assistants were used as allowed by the assignments. The documented use
 | Sereen Karakra | Claude for Homework 1 Module 3 equations, poles, eigenvalues, RK4, and plot sampling at low damping. |
 | Raneem Khawaja | ChatGPT for Homework 1 Module 4 and Homework 2 P3 coding assistance, issue text, and documentation. |
 | Maysam Abu Eid | AI assistance for Homework 1 Module 1 review, ramp/error calculations, markers, validation, issue text, and README preparation. |
-| Masa Awad | Claude for the Homework 1 Euler/RK4 bonus implementation, error plots, and prediction interaction. |
+| Masa Awad | Claude for the Homework 1 Euler/RK4 bonus (implementation, error plots, prediction interaction) and for Homework 2 My System and the state-space bonus (layout, solver reuse, design formulas, Arduino generation, derivation checks). |
 
 The motor application also discloses Claude assistance for layout, solver reuse, design formulas, and Arduino generation. The state-space bonus discloses Claude assistance for derivation checks, solver reuse, and layout. ChatGPT helped organise this combined README from the supplied project files.
 
