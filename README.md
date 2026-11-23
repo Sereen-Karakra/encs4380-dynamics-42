@@ -102,7 +102,7 @@ The control modules reuse the first-order and second-order models from Homework 
 
 ### P1 — PID Playground
 
-**File:** `pid-playground.html` · **Owner:** Dania Abu Ayyash
+**File:** `pid-playground.html` · **Owner:** Dania Abu Ayyash · **Issue:** [#6](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/6) — Closed
 
 - First-order and second-order plant selection.
 - Adjustable Kp, Ki, Kd, setpoint, plant parameters, and control limit.
@@ -114,7 +114,7 @@ P1 uses RK4 integration and takes derivative action from the measured output to 
 
 ### P2 — Slow Sensor in the Loop
 
-**File:** `slow-sensor.html` · **Owner:** Sereen Karakra
+**File:** `slow-sensor.html` · **Owner:** Sereen Karakra · **Issue:** [#10](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/10) — Closed
 
 - A first-order sensor in the feedback path, with adjustable time constant τs.
 - Adjustable PID gains, plant parameters, setpoint, and actuator limit.
@@ -157,7 +157,7 @@ Sampling effects, both plant models, code updates, copying/downloading, predicti
 
 ### P4 — Tuning Challenge
 
-**File:** `tuning-challenge.html` · **Owner:** Maysam Abu Eid
+**File:** `tuning-challenge.html` · **Owner:** Maysam Abu Eid · **Issue:** [#8](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/8) — Closed
 
 - Hidden random first-order or second-order plants.
 - Adjustable PID gains and specifications for overshoot, settling time, and steady-state error.
@@ -233,7 +233,30 @@ Performance metrics are finite-time numerical estimates. Follow each page's metr
 
 The same repository contains both assignments. Module ownership is tracked through GitHub Issues, and each member's contributions remain visible in the commit history.
 
-Homework 1 issue references are **#2** (Module 1), **#5** (Module 2), **#1** (Module 3), **#3** (Module 4), and **#4** (bonus). Homework 2 references confirmed here are **#9** (Digital PID) and **#7** (motor application). Other module issues can be found in the repository's [Issues](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues).
+### Homework 1 Issues
+
+| Module | Owner | Issue |
+|---|---|---|
+| Module 1: First-order time response | Maysam Abu Eid | [#2](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/2) |
+| Module 2: First-order frequency response | Dania Abu Ayyash | [#5](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/5) |
+| Module 3: Second-order response | Sereen Karakra | [#1](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/1) |
+| Module 4: Guess the Sensor | Raneem Khawaja | [#3](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/3) |
+| Euler/RK4 bonus | Masa Awad | [#4](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/4) |
+
+### Homework 2 Issues
+
+| Part | Owner | Issue | Status |
+|---|---|---|---|
+| P1: PID Playground | Dania Abu Ayyash | [#6](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/6) | Closed |
+| P2: Slow Sensor | Sereen Karakra | [#10](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/10) | Closed |
+| P3: Digital PID | Raneem Khawaja | [#9](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/9) | Closed |
+| P4: Tuning Challenge | Maysam Abu Eid | [#8](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/8) | Closed |
+
+**Motor application:** [#7](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/7) — Masa Awad. Its current status is shown on the issue page.
+
+All module issues should be assigned to their respective owners. The repository's [Issues page](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues) records the discussion and completion history.
+
+### Release Milestones
 
 | Assignment | Release tag | Final submission milestone | Demos |
 |---|---|---|---|
@@ -250,7 +273,7 @@ AI coding assistants were used as allowed by the assignments. The documented use
 |---|---|
 | Dania Abu Ayyash | ChatGPT for Homework 1 Module 2 development, debugging, plots, calculations, and validation checks. |
 | Sereen Karakra | Claude for Homework 1 Module 3 equations, poles, eigenvalues, RK4, and plot sampling at low damping. |
-| Raneem Khawaja | ChatGPT for Homework 1 Module 4 and Homework 2 P3 coding assistance ,issue text and documentation. |
+| Raneem Khawaja | ChatGPT for Homework 1 Module 4 and Homework 2 P3 coding assistance, issue text, and documentation. |
 | Maysam Abu Eid | AI assistance for Homework 1 Module 1 review, ramp/error calculations, markers, validation, issue text, and README preparation. |
 | Masa Awad | Claude for the Homework 1 Euler/RK4 bonus implementation, error plots, and prediction interaction. |
 
@@ -261,11 +284,14 @@ Each member is responsible for checking their results and explaining their own c
 ## Screenshots
 
 <details>
-<summary>Saved toolkit screenshots</summary>
+<summary>Homework 1 — Saved toolkit screenshots</summary>
 
 ![Toolkit screenshot 1](screenshots/png1.png)
+
 ![Toolkit screenshot 2](screenshots/png2.png)
+
 ![Toolkit screenshot 3](screenshots/png3.png)
+
 ![Toolkit screenshot 4](screenshots/png4.png)
 
 </details>
@@ -274,35 +300,50 @@ Each member is responsible for checking their results and explaining their own c
 <summary>Additional Homework 1 screenshots</summary>
 
 ![Toolkit view 1](https://github.com/user-attachments/assets/5d845cf1-8dbd-4ba4-844e-ce5fd11b898d)
+
 ![Toolkit view 2](https://github.com/user-attachments/assets/39edc31c-b975-40eb-8518-4b3b8ba8250d)
+
 ![Toolkit view 3](https://github.com/user-attachments/assets/243c2e76-2b94-48f2-af9b-3d14dadfd61a)
+
 ![Toolkit view 4](https://github.com/user-attachments/assets/cf34041f-bfd3-41f7-a566-e8cb55f3a2e5)
+
 ![Toolkit view 5](https://github.com/user-attachments/assets/a58bdf24-859d-4d20-8fdf-4e5b36e23a57)
+
 ![Toolkit view 6](https://github.com/user-attachments/assets/55b234f3-4785-4534-9dd3-610fee6af890)
+
 ![Toolkit view 7](https://github.com/user-attachments/assets/69a150d4-3ad7-4d56-a904-991f9cfe8010)
+
 ![Toolkit view 8](https://github.com/user-attachments/assets/10816c70-94c1-4ab8-97c2-a3715dfd5f92)
+
 ![Toolkit view 9](https://github.com/user-attachments/assets/639dcfff-6569-48e0-9656-6eb5111cacca)
 
 </details>
+
 <details>
 <summary>Homework 2 — PID Control Toolkit</summary>
 
 ### P1: PID Playground
+
 ![PID Playground](screenshots/png5.png)
 
 ### P2: Slow Sensor
+
 ![Slow Sensor](screenshots/png6.png)
 
 ### P3: Digital PID
+
 ![Digital PID](screenshots/png7.png)
 
 ### P4: Tuning Challenge
+
 ![Tuning Challenge](screenshots/png8.png)
 
 ### My System: Motor Speed Control
+
 ![Motor Speed Control](screenshots/png9.png)
 
 ### Bonus: State-Space Control
+
 ![State-Space Control](screenshots/png10.png)
 
 </details>
