@@ -117,9 +117,9 @@ P1 uses RK4 integration and takes derivative action from the measured output to 
 **File:** `slow-sensor.html` · **Owner:** Sereen Karakra · **Issue:** [#10](https://github.com/Sereen-Karakra/encs4380-dynamics-42/issues/10) — Closed
 
 - A first-order sensor in the feedback path, with adjustable time constant τs.
-- Adjustable PID gains, plant parameters, setpoint, and actuator limit.
-- True output and sensor measurement plotted together.
-- Control-signal plot, performance metrics, interpretation notes, and validation checks.
+- Adjustable PID gains, plant parameters (first or second order), setpoint, actuator limit, and an anti-windup switch.
+- True output and sensor measurement plotted together, with a closed-loop block diagram.
+- Control-signal plot, performance metrics, quick scenarios (including an unstable one), "Predict, then check", and validation checks.
 
 The controller acts on the sensor reading. Sensor lag can therefore produce ringing and change stability, depending on the plant and controller settings.
 
@@ -272,7 +272,7 @@ AI coding assistants were used as allowed by the assignments. The documented use
 | Member | Disclosed assistance |
 |---|---|
 | Dania Abu Ayyash | ChatGPT for Homework 1 Module 2 development, debugging, plots, calculations, and validation checks. |
-| Sereen Karakra | Claude for Homework 1 Module 3 equations, poles, eigenvalues, RK4, and plot sampling at low damping. |
+| Sereen Karakra | Claude for Homework 1 Module 3 (equations, poles, RK4, plot sampling). ChatGPT and Claude for Homework 2 P2 (sensor-in-the-loop model, layout). |
 | Raneem Khawaja | ChatGPT for Homework 1 Module 4 and Homework 2 P3 coding assistance, issue text, and documentation. |
 | Maysam Abu Eid | AI assistance for Homework 1 Module 1 review, ramp/error calculations, markers, validation, issue text, and README preparation. |
 | Masa Awad | Claude for the Homework 1 Euler/RK4 bonus (implementation, error plots, prediction interaction) and for Homework 2 My System and the state-space bonus (layout, solver reuse, design formulas, Arduino generation, derivation checks). |
